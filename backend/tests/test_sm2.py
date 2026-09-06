@@ -60,8 +60,8 @@ def test_sm2_ease_floor(tmp_path):
     s = factory()
     card = get_or_create_card(s, 1, 1)
     for _ in range(10):
-        sm2_review(card, 1, NOW)  # 反复失败 ease 不低于 1.3
-    assert card.ease_factor >= 1.3
+        sm2_review(card, 3, NOW)  # 反复「模糊」：ease 每次降 0.14，最终压到下限
+    assert card.ease_factor == 1.3
     s.close()
 
 

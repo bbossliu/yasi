@@ -50,7 +50,9 @@ def build_review_queue(session, user_id: int, limit: int = 20,
     words = {w.id: w for w in session.scalars(
         select(Word).where(Word.id.in_(word_ids or {0}))).all()}
     for card in due_cards[:limit]:
-        w = words[card.word_id]
+        w = words.get(card.word_id)
+        if w is None:
+            continue  # 词已被删的孤儿卡，跳过避免 500
         queue.append({"word_id": w.id, "text": w.text, "pos": w.pos, "meaning": w.meaning,
                       "paraphrase_chain": w.paraphrase_chain,
                       "example_sentence": w.example_sentence, "is_new": False})

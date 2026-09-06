@@ -17,7 +17,7 @@ npm install
 npm run dev                  # http://localhost:5173
 ```
 
-注意：V2 给 practice 表加了列，V1 时期生成的 `backend/yasi.db` 请删除后重建（开发期无迁移机制）。
+注意：V2 给 practice 表加了列，V3 给 word 表加了 pos/meaning 列；旧版生成的 `backend/yasi.db` 请删除后重建（开发期无迁移机制）。
 
 ### 端口占用
 

@@ -123,6 +123,7 @@ function ReviewSession({ initialQueue, onFinish }: {
   const [flipped, setFlipped] = useState(false)
   const [doneCount, setDoneCount] = useState(0)
   const [forecast, setForecast] = useState<ForecastOut[]>([])
+  const [busy, setBusy] = useState(false)
 
   const current = queue[0]
 
@@ -134,8 +135,16 @@ function ReviewSession({ initialQueue, onFinish }: {
   }, [queue.length])
 
   const rate = async (quality: 1 | 3 | 5) => {
-    if (!current) return
-    await submitReview(current.word_id, quality)
+    if (!current || busy) return
+    setBusy(true)
+    try {
+      await submitReview(current.word_id, quality)
+    } catch (err) {
+      console.error('提交复习评分失败', err)
+      return  // 保持卡片不动
+    } finally {
+      setBusy(false)
+    }
     setDoneCount((n) => n + 1)
     setQueue((q) => q.slice(1))
     setFlipped(false)
@@ -213,12 +222,12 @@ function ReviewSession({ initialQueue, onFinish }: {
       </AnimatePresence>
       {flipped && (
         <div className="grid grid-cols-3 gap-3">
-          <button onClick={() => rate(1)}
-            className="rounded-xl bg-red-500 py-3 font-semibold text-white">不认识</button>
-          <button onClick={() => rate(3)}
-            className="rounded-xl bg-amber-500 py-3 font-semibold text-white">模糊</button>
-          <button onClick={() => rate(5)}
-            className="rounded-xl bg-emerald-600 py-3 font-semibold text-white">认识</button>
+          <button onClick={() => rate(1)} disabled={busy}
+            className="rounded-xl bg-red-500 py-3 font-semibold text-white disabled:opacity-50">不认识</button>
+          <button onClick={() => rate(3)} disabled={busy}
+            className="rounded-xl bg-amber-500 py-3 font-semibold text-white disabled:opacity-50">模糊</button>
+          <button onClick={() => rate(5)} disabled={busy}
+            className="rounded-xl bg-emerald-600 py-3 font-semibold text-white disabled:opacity-50">认识</button>
         </div>
       )}
     </div>
