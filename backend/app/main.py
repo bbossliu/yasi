@@ -39,6 +39,8 @@ def init_db() -> None:
         seed_speaking_db(session)
         from app.seed_vocab import seed_vocab_db
         seed_vocab_db(session)
+        from app.seed_listening import seed_listening_db
+        seed_listening_db(session)
     finally:
         session.close()
 

@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     iflytek_api_key: str = ""  # 预留（流式接口用）
     uploads_dir: str = "uploads"
     tts_cache_dir: str = "tts_cache"
+    listening_audio_dir: str = "listening_audio"
 
 
 settings = Settings()
