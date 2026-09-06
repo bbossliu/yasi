@@ -140,3 +140,54 @@ class SessionSummary(BaseModel):
     session_id: int
     avg_band: float | None
     turns: list[TurnSummaryItem]
+
+
+class TopicOut(BaseModel):
+    topic: str
+    word_count: int
+    mastered_count: int
+    due_count: int
+
+
+class WordOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    text: str
+    pos: str
+    meaning: str
+    paraphrase_chain: list[str]
+    example_sentence: str
+    due_at: datetime | None = None
+    reps: int = 0
+
+
+class ReviewCardOut(BaseModel):
+    word_id: int
+    text: str
+    pos: str
+    meaning: str
+    paraphrase_chain: list[str]
+    example_sentence: str
+    is_new: bool
+
+
+class ReviewQueueOut(BaseModel):
+    cards: list[ReviewCardOut]
+    due_total: int
+
+
+class ReviewSubmit(BaseModel):
+    quality: int = Field(ge=1, le=5)
+
+    @field_validator("quality")
+    @classmethod
+    def only_three_levels(cls, v: int) -> int:
+        if v not in (1, 3, 5):
+            raise ValueError("quality 仅支持 1（不认识）/ 3（模糊）/ 5（认识）")
+        return v
+
+
+class ForecastOut(BaseModel):
+    date: str
+    count: int
