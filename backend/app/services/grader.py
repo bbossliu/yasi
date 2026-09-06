@@ -36,6 +36,7 @@ class LLMGrader:
                     ],
                     response_format={"type": "json_object"},
                     temperature=0.2,
+                    max_tokens=8192,
                 )
                 return GradingResult.model_validate_json(resp.choices[0].message.content)
             except Exception as exc:  # 网络错误与 JSON 校验失败统一重试
