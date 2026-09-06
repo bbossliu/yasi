@@ -38,7 +38,15 @@ class LLMGrader:
                     temperature=0.2,
                     max_tokens=8192,
                 )
-                return GradingResult.model_validate_json(resp.choices[0].message.content)
+                choice = resp.choices[0]
+                try:
+                    return GradingResult.model_validate_json(choice.message.content)
+                except Exception:
+                    logger.warning(
+                        "invalid grading json: finish_reason=%s usage=%s tail=%r",
+                        choice.finish_reason, resp.usage, (choice.message.content or "")[-100:],
+                    )
+                    raise
             except Exception as exc:  # 网络错误与 JSON 校验失败统一重试
                 last_error = exc
                 logger.warning("grading attempt %d failed: %s", attempt + 1, exc)
