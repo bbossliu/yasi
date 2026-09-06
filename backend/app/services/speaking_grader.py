@@ -124,14 +124,19 @@ def run_speaking_turn(practice_id: int, session_factory, transcriber=None, grade
         ))
         practice.status = "done"
         practice.total_band = result.bands.overall
+        new_errors = []
         for annotation in result.annotations:
             if annotation.error_type:
-                session.add(ErrorItem(
+                item = ErrorItem(
                     user_id=practice.user_id,
                     practice_id=practice.id,
                     error_type=annotation.error_type,
                     context=annotation.original,
-                ))
+                )
+                session.add(item)
+                new_errors.append(item)
+        from app.services.vocab_link import link_vocab_errors
+        link_vocab_errors(session, practice.user_id, new_errors)
         mark_speaking_learned(session, practice.user_id)
 
         # 推进会话
