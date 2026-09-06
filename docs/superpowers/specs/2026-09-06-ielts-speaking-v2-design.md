@@ -19,7 +19,7 @@ V1 已交付写作 Task 2 批改闭环（practice/ai_feedback/error_item 三表�
 | V2 范围 | 完整版：Part 1/2/3 三入口 + 多轮 AI 考官对话 + edge-tts 语音提问 |
 | 对话推进 | Part 1 按预设问题序列；Part 3 由 DeepSeek 基于用户回答转写生成追问；每轮回答独立评分 |
 | TTS | edge-tts 预生成提问音频，按题目 ID 缓存磁盘；失败降级纯文字 |
-| 录音 | 浏览器 MediaRecorder（webm/opus），上传 FastAPI 存 `backend/uploads/`（gitignored） |
+| 录音 | 浏览器采集后**编码为 WAV**（16kHz 单声道 16bit，Web Audio API 客户端编码——讯飞不支持 webm），上传 FastAPI 存 `backend/uploads/`（gitignored） |
 | 发音分项 | 转写置信度 + 文本表现侧面评估，UI 固定标注「发音分为间接评估，仅供参考」 |
 | 题库 | 当季（2026 年 9-12 月换题季）话题卡种子：手写 + DeepSeek 预生成入库 |
 
@@ -41,6 +41,8 @@ session_id  可空整数，FK speaking_session.id（写作练习为 NULL）
 ```
 
 **复用不变**：`ai_feedback.bands` 是 schemaless JSON——口语用 `{fluency, lexical, grammar, pronunciation, overall}`；新增 Pydantic 校验 schema `SpeakingResult`。`error_item`、`skill_mastery`（口语节点标黄）逻辑不变。
+
+**既有接口变更**：`EssayOut` 增加 `module: str` 字段（历史页模块标签需要；ORM 已有该列，纯响应层添加）。
 
 ## 4. 后端组件
 
@@ -80,8 +82,8 @@ GET  /api/tts/{question_hash}.mp3        TTS 音频静态服务
 | 页面 | 内容 |
 |---|---|
 | `SpeakingPage`（新） | Part 1/2/3 三个 Tab + 话题卡列表，点卡开练 |
-| `PracticeRoom`（新） | 聊天界面：AI 考官气泡（文字 + 播放按钮播 TTS）/ 用户气泡（录音回放 + 转写 + 该轮得分）；录音按钮（长按或点击启停，MediaRecorder）；Part 2 模式：cue card + 1 分钟准备倒计时 + 2 分钟陈述 |
-| `ResultPage`（改） | 按 module 渲染：口语四项雷达（FC/LR/GRA/P）+ 发音局限标注 + 录音回放与转写对照 |
+| `PracticeRoom`（新） | 聊天界面：AI 考官气泡（文字 + 播放按钮播 TTS）/ 用户气泡（录音回放 + 转写 + 该轮得分）；录音按钮（MediaRecorder + Web Audio 编码 WAV）；每轮评分结果以气泡内反馈卡（分项分 + 批注展开）呈现；Part 2 模式：cue card + 1 分钟准备倒计时 + 2 分钟陈述；会话结束显示汇总视图（各轮得分 + 均分） |
+| `ResultPage`（不改） | 保持仅服务写作；口语结果内嵌 PracticeRoom，不走 /result 路由 |
 | `HistoryPage`（改） | 记录加模块标签（写作/口语） |
 | `DashboardPage`（改） | 加口语最新分卡片 |
 | 路由 | `/speaking`、`/speaking/session/:id` |
