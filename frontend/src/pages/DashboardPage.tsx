@@ -14,7 +14,8 @@ export default function DashboardPage() {
     listErrors().then(setErrors).catch(() => undefined)
   }, [])
 
-  const latest = essays.find((e) => e.total_band !== null)
+  const latest = essays.find((e) => e.total_band !== null && e.module === 'writing')
+  const latestSpeaking = essays.find((e) => e.total_band !== null && e.module === 'speaking')
   const topErrors = useMemo(() => {
     const counts = new Map<string, number>()
     for (const e of errors) counts.set(e.error_type, (counts.get(e.error_type) ?? 0) + 1)
@@ -25,7 +26,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-xl border border-slate-200 bg-white p-6">
           <div className="text-sm text-slate-400">当前预测分 → 目标分</div>
           <div className="mt-1 text-3xl font-bold text-indigo-600">
@@ -38,6 +39,15 @@ export default function DashboardPage() {
               style={{ width: `${progress * 100}%` }}
             />
           </div>
+        </div>
+        <div className="rounded-xl border border-slate-200 bg-white p-6">
+          <div className="text-sm text-slate-400">口语最新分</div>
+          <div className="mt-1 text-3xl font-bold text-emerald-600">
+            {latestSpeaking?.total_band?.toFixed(1) ?? '—'}
+          </div>
+          <Link to="/speaking" className="mt-3 inline-block text-sm text-emerald-600 hover:underline">
+            去练口语 →
+          </Link>
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-6">
           <div className="text-sm text-slate-400">累计练习</div>
