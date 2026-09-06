@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { NavBar } from './components/NavBar'
+import ResultPage from './pages/ResultPage'
 import WritingPage from './pages/WritingPage'
 
 function Placeholder({ name }: { name: string }) {
@@ -15,7 +16,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Placeholder name="仪表盘" />} />
             <Route path="/write" element={<WritingPage />} />
-            <Route path="/result/:id" element={<Placeholder name="批改结果" />} />
+            <Route path="/result/:id" element={<ResultPage />} />
             <Route path="/history" element={<Placeholder name="历史记录" />} />
           </Routes>
         </main>

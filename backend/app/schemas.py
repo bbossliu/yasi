@@ -55,6 +55,7 @@ class EssayOut(BaseModel):
     total_band: float | None
     prompt_title: str
     word_count: int
+    duration_sec: int
     created_at: datetime
 
 

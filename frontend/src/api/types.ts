@@ -16,6 +16,7 @@ export interface EssayOut {
   total_band: number | null
   prompt_title: string
   word_count: number
+  duration_sec: number
   created_at: string
 }
 
