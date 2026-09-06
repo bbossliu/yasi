@@ -3,11 +3,15 @@ import type {
   EssayDetail,
   EssayOut,
   ErrorItemOut,
+  ForecastOut,
   PromptOut,
+  ReviewCardOut,
   SessionOut,
   SessionSummary,
   SpeakingCardOut,
+  TopicOut,
   TurnDetail,
+  WordOut,
 } from './types'
 
 const BASE = '/api'
@@ -74,4 +78,28 @@ export function getSpeakingTurn(practiceId: number): Promise<TurnDetail> {
 
 export function finishSpeakingSession(id: number): Promise<SessionSummary> {
   return request(`/speaking/sessions/${id}/finish`, { method: 'POST' })
+}
+
+export function listVocabTopics(): Promise<TopicOut[]> {
+  return request('/vocab/topics')
+}
+
+export function listVocabWords(topic: string): Promise<WordOut[]> {
+  return request(`/vocab/words?topic=${encodeURIComponent(topic)}`)
+}
+
+export function getReviewQueue(limit = 20): Promise<{ cards: ReviewCardOut[]; due_total: number }> {
+  return request(`/vocab/review/queue?limit=${limit}`)
+}
+
+export function submitReview(wordId: number, quality: 1 | 3 | 5): Promise<{ next_due_at: string; interval_days: number }> {
+  return request(`/vocab/review/${wordId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ quality }),
+  })
+}
+
+export function getVocabForecast(): Promise<ForecastOut[]> {
+  return request('/vocab/forecast')
 }

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { listErrors, listEssays } from '../api/client'
+import { listErrors, listEssays, listVocabTopics } from '../api/client'
 import type { EssayOut, ErrorItemOut } from '../api/types'
 
 const TARGET_BAND = 6.5
@@ -8,10 +8,16 @@ const TARGET_BAND = 6.5
 export default function DashboardPage() {
   const [essays, setEssays] = useState<EssayOut[]>([])
   const [errors, setErrors] = useState<ErrorItemOut[]>([])
+  const [vocab, setVocab] = useState({ mastered: 0, total: 0, due: 0 })
 
   useEffect(() => {
     listEssays().then(setEssays).catch(() => undefined)
     listErrors().then(setErrors).catch(() => undefined)
+    listVocabTopics().then((topics) => setVocab({
+      mastered: topics.reduce((n, t) => n + t.mastered_count, 0),
+      total: topics.reduce((n, t) => n + t.word_count, 0),
+      due: topics.reduce((n, t) => n + t.due_count, 0),
+    })).catch(() => undefined)
   }, [])
 
   const latest = essays.find((e) => e.total_band !== null && e.module === 'writing')
@@ -50,6 +56,18 @@ export default function DashboardPage() {
           </Link>
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-6">
+          <div className="text-sm text-slate-400">词汇掌握</div>
+          <div className="mt-1 text-3xl font-bold text-amber-600">
+            {vocab.mastered}/{vocab.total}
+          </div>
+          <div className="mt-1 text-sm text-slate-400">
+            {vocab.due > 0 ? `${vocab.due} 词今日到期` : '今日无到期'}
+          </div>
+          <Link to="/vocab" className="mt-3 inline-block text-sm text-amber-600 hover:underline">
+            去复习 →
+          </Link>
+        </div>
+        <div className="rounded-xl border border-slate-200 bg-white p-6">
           <div className="text-sm text-slate-400">累计练习</div>
           <div className="mt-1 text-3xl font-bold">{essays.length} 次</div>
           <Link to="/write" className="mt-3 inline-block text-sm text-indigo-600 hover:underline">
@@ -73,7 +91,7 @@ export default function DashboardPage() {
         </div>
       </div>
       <div className="rounded-xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-400">
-        能力树、听力 / 词汇模块将在 V3-V4 解锁
+        能力树、听力模块将在 V4 解锁
       </div>
     </div>
   )

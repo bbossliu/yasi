@@ -5,6 +5,7 @@ import HistoryPage from './pages/HistoryPage'
 import PracticeRoom from './pages/PracticeRoom'
 import ResultPage from './pages/ResultPage'
 import SpeakingPage from './pages/SpeakingPage'
+import VocabPage from './pages/VocabPage'
 import WritingPage from './pages/WritingPage'
 
 export default function App() {
@@ -19,6 +20,7 @@ export default function App() {
             <Route path="/result/:id" element={<ResultPage />} />
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/speaking" element={<SpeakingPage />} />
+            <Route path="/vocab" element={<VocabPage />} />
             <Route path="/speaking/session/:id" element={<PracticeRoom />} />
           </Routes>
         </main>
