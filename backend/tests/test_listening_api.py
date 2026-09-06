@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 
 from app.database import Base, make_session_factory
 from app.main import app
-from app.models import ErrorItem, Practice, User
+from app.models import User
 from app.seed_listening import seed_listening_db
 
 
