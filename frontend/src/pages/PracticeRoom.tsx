@@ -47,6 +47,20 @@ export default function PracticeRoom() {
     return () => clearTimeout(t)
   }, [prepLeft])
 
+  // 卸载时释放录音资源
+  useEffect(() => {
+    return () => {
+      if (recordTimerRef.current) {
+        clearTimeout(recordTimerRef.current)
+        recordTimerRef.current = null
+      }
+      if (recorderRef.current) {
+        void recorderRef.current.stop()
+        recorderRef.current = null
+      }
+    }
+  }, [])
+
   if (!session) {
     return (
       <div className="p-10 text-slate-400">
@@ -73,20 +87,30 @@ export default function PracticeRoom() {
   }
 
   const stopRecord = async () => {
-    if (!recorderRef.current) return
-    if (recordTimerRef.current) clearTimeout(recordTimerRef.current)
+    const recorder = recorderRef.current
+    if (!recorder) return
+    recorderRef.current = null
+    if (recordTimerRef.current) {
+      clearTimeout(recordTimerRef.current)
+      recordTimerRef.current = null
+    }
     setRecording(false)
     setBusy(true)
     try {
-      const blob = await recorderRef.current.stop()
-      recorderRef.current = null
+      const blob = await recorder.stop()
       const audioUrl = URL.createObjectURL(blob)
       const { practice_id } = await submitSpeakingTurn(session.id, blob)
-      // 轮询该轮结果
+      // 轮询该轮结果（最多 30 次 × 2s ≈ 60s）
       let detail = await getSpeakingTurn(practice_id)
-      while (detail.status === 'pending') {
+      let polls = 0
+      while (detail.status === 'pending' && polls < 30) {
         await new Promise((r) => setTimeout(r, 2000))
         detail = await getSpeakingTurn(practice_id)
+        polls++
+      }
+      if (detail.status === 'pending') {
+        setMessages((m) => [...m, { role: 'system', text: '评分超时，请重新回答。' }])
+        return
       }
       if (detail.status === 'needs_review' || !detail.feedback) {
         setMessages((m) => [...m, { role: 'system', text: '本次转写/评分未完成，请重新回答该问题。' }])
@@ -117,8 +141,23 @@ export default function PracticeRoom() {
   }
 
   const finishEarly = async () => {
-    setDone(true)
-    setSummary(await finishSpeakingSession(session.id))
+    if (recorderRef.current) {
+      if (recordTimerRef.current) {
+        clearTimeout(recordTimerRef.current)
+        recordTimerRef.current = null
+      }
+      const recorder = recorderRef.current
+      recorderRef.current = null
+      void recorder.stop()
+      setRecording(false)
+    }
+    try {
+      const summary = await finishSpeakingSession(session.id)
+      setDone(true)
+      setSummary(summary)
+    } catch (e) {
+      setError(String(e))
+    }
   }
 
   const canRecord = !busy && !done && (session.part !== 2 || prepLeft === 0)
