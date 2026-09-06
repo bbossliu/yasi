@@ -35,8 +35,9 @@ TASK2_PROMPTS: list[dict] = [
 
 
 def seed_db(session) -> None:
-    """幂等写入能力树种子数据。"""
-    existing = session.scalars(select(SkillNode.code)).all()
+    """幂等写入能力树种子数据（按模块判断，便于后续模块增量补种）。"""
+    existing = session.scalars(
+        select(SkillNode.code).where(SkillNode.code.like("writing.%"))).first()
     if existing:
         return
     code_to_node: dict[str, SkillNode] = {}

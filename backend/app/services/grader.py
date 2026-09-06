@@ -39,11 +39,11 @@ class LLMGrader:
                     max_tokens=8192,
                 )
                 choice = resp.choices[0]
-                content = choice.message.content or ""
+                raw = choice.message.content or ""
                 try:
-                    return GradingResult.model_validate_json(content)
+                    return GradingResult.model_validate_json(raw)
                 except Exception:
-                    stripped = content.rstrip()
+                    stripped = raw.rstrip()
                     if stripped and not stripped.endswith("}"):
                         try:
                             return GradingResult.model_validate_json(stripped + "}")
@@ -51,7 +51,7 @@ class LLMGrader:
                             pass
                     logger.warning(
                         "invalid grading json: finish_reason=%s usage=%s tail=%r",
-                        choice.finish_reason, resp.usage, content[-100:],
+                        choice.finish_reason, resp.usage, raw[-100:],
                     )
                     raise
             except Exception as exc:  # 网络错误与 JSON 校验失败统一重试
@@ -89,32 +89,40 @@ def run_grading(practice_id: int, session_factory, grader=None) -> None:
         if grader is None:
             grader = build_grader()
         try:
-            result = grader.grade(practice.prompt_text, practice.content)
-        except GradingFailed as exc:
-            practice.status = "needs_review"
-            session.commit()
-            logger.error("grading failed for practice %s: %s", practice_id, exc)
-            return
+            try:
+                result = grader.grade(practice.prompt_text, practice.content)
+            except GradingFailed as exc:
+                practice.status = "needs_review"
+                session.commit()
+                logger.error("grading failed for practice %s: %s", practice_id, exc)
+                return
 
-        session.add(AIFeedback(
-            practice_id=practice.id,
-            bands=result.bands.model_dump(),
-            annotations=[a.model_dump() for a in result.annotations],
-            rewrite=result.rewrite,
-            model=getattr(grader, "model", "unknown"),
-            is_mock=getattr(grader, "is_mock", False),
-        ))
-        practice.status = "done"
-        practice.total_band = result.bands.overall
-        for annotation in result.annotations:
-            if annotation.error_type:
-                session.add(ErrorItem(
-                    user_id=practice.user_id,
-                    practice_id=practice.id,
-                    error_type=annotation.error_type,
-                    context=annotation.original,
-                ))
-        mark_writing_learned(session, practice.user_id)
-        session.commit()
+            session.add(AIFeedback(
+                practice_id=practice.id,
+                bands=result.bands.model_dump(),
+                annotations=[a.model_dump() for a in result.annotations],
+                rewrite=result.rewrite,
+                model=getattr(grader, "model", "unknown"),
+                is_mock=getattr(grader, "is_mock", False),
+            ))
+            practice.status = "done"
+            practice.total_band = result.bands.overall
+            for annotation in result.annotations:
+                if annotation.error_type:
+                    session.add(ErrorItem(
+                        user_id=practice.user_id,
+                        practice_id=practice.id,
+                        error_type=annotation.error_type,
+                        context=annotation.original,
+                    ))
+            mark_writing_learned(session, practice.user_id)
+            session.commit()
+        except Exception:
+            session.rollback()
+            practice = session.get(Practice, practice_id)
+            if practice is not None:
+                practice.status = "needs_review"
+                session.commit()
+            logger.exception("unexpected grading error for practice %s", practice_id)
     finally:
         session.close()

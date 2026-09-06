@@ -95,3 +95,61 @@ def test_llm_grader_retries_then_raises():
     grader.model = "test"
     with pytest.raises(GradingFailed):
         grader.grade("p", "c")
+
+
+class _FakeMessage:
+    def __init__(self, content):
+        self.content = content
+
+
+class _FakeChoice:
+    def __init__(self, content):
+        self.message = _FakeMessage(content)
+        self.finish_reason = "stop"
+
+
+class _FakeResp:
+    def __init__(self, content):
+        self.choices = [_FakeChoice(content)]
+        self.usage = None
+
+
+class StatefulFakeClient:
+    """第一次返回未闭合 JSON，第二次返回合法 JSON；记录每次 create 的 messages。"""
+
+    def __init__(self):
+        self.calls = []
+        self._payloads = [
+            SAMPLE_GRADING.model_dump_json()[:-20],  # 字符串中途截断，补 } 也修不好，必定重试
+            SAMPLE_GRADING.model_dump_json(),
+        ]
+
+        client = self
+
+        class _Completions:
+            @staticmethod
+            def create(**kwargs):
+                client.calls.append(kwargs)
+                return _FakeResp(client._payloads[len(client.calls) - 1])
+
+        class _Chat:
+            completions = _Completions()
+
+        self.chat = _Chat()
+
+
+def test_llm_grader_retry_sends_original_essay():
+    client = StatefulFakeClient()
+    grader = LLMGrader.__new__(LLMGrader)
+    grader.client = client
+    grader.model = "test"
+
+    essay = "ORIGINAL ESSAY MARKER: some unique sentence."
+    result = grader.grade("prompt text", essay)
+
+    # (a) 第一次未闭合、第二次合法 → grade 成功返回
+    assert result.bands.overall == 6.0
+    assert len(client.calls) == 2
+    # (b) 第二次调用的 user message 仍含原作文（未被上一次 LLM 输出覆盖）
+    second_user_msg = client.calls[1]["messages"][1]["content"]
+    assert essay in second_user_msg
