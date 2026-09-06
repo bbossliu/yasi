@@ -95,3 +95,48 @@ class EssayDetail(EssayOut):
     content: str
     feedback: FeedbackOut | None
     errors: list[ErrorItemOut]
+
+
+class SpeakingCardOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    part: int
+    topic: str
+    season: str
+    payload: dict
+
+
+class SessionCreate(BaseModel):
+    card_id: int
+
+
+class SessionOut(BaseModel):
+    id: int
+    part: int
+    topic: str
+    status: str
+    question: str
+    tts_url: str | None
+
+
+class TurnDetail(BaseModel):
+    practice_id: int
+    status: str
+    transcript: str | None
+    feedback: FeedbackOut | None
+    next_question: str | None
+    next_tts_url: str | None
+    session_done: bool
+
+
+class TurnSummaryItem(BaseModel):
+    question: str
+    transcript: str
+    total_band: float | None
+
+
+class SessionSummary(BaseModel):
+    session_id: int
+    avg_band: float | None
+    turns: list[TurnSummaryItem]
