@@ -25,6 +25,20 @@ class GradingResult(BaseModel):
     rewrite: str
 
 
+class SpeakingBands(BaseModel):
+    fluency: float = Field(ge=0, le=9)
+    lexical: float = Field(ge=0, le=9)
+    grammar: float = Field(ge=0, le=9)
+    pronunciation: float = Field(ge=0, le=9)
+    overall: float = Field(ge=0, le=9)
+
+
+class SpeakingResult(BaseModel):
+    bands: SpeakingBands
+    annotations: list[Annotation]
+    rewrite: str
+
+
 class EssayCreate(BaseModel):
     prompt_title: str = Field(min_length=1, max_length=300)
     prompt_text: str = Field(min_length=1)
@@ -56,6 +70,7 @@ class EssayOut(BaseModel):
     prompt_title: str
     word_count: int
     duration_sec: int
+    module: str
     created_at: datetime
 
 

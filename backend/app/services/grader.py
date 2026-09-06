@@ -7,6 +7,7 @@ from app.config import settings
 from app.models import AIFeedback, ErrorItem, Practice, SkillMastery, SkillNode
 from app.prompt_templates import SYSTEM_PROMPT, USER_PROMPT_TEMPLATE
 from app.schemas import GradingResult
+from app.services.llm_json import LLMCallFailed, chat_json
 from app.services.mock_grader import MockGrader
 
 logger = logging.getLogger(__name__)
@@ -24,40 +25,14 @@ class LLMGrader:
         self.model = model
 
     def grade(self, prompt_text: str, content: str) -> GradingResult:
-        last_error: Exception | None = None
-        for attempt in range(3):
-            try:
-                resp = self.client.chat.completions.create(
-                    model=self.model,
-                    messages=[
-                        {"role": "system", "content": SYSTEM_PROMPT},
-                        {"role": "user", "content": USER_PROMPT_TEMPLATE.format(
-                            prompt_text=prompt_text, content=content)},
-                    ],
-                    response_format={"type": "json_object"},
-                    temperature=0.2,
-                    max_tokens=8192,
-                )
-                choice = resp.choices[0]
-                raw = choice.message.content or ""
-                try:
-                    return GradingResult.model_validate_json(raw)
-                except Exception:
-                    stripped = raw.rstrip()
-                    if stripped and not stripped.endswith("}"):
-                        try:
-                            return GradingResult.model_validate_json(stripped + "}")
-                        except Exception:
-                            pass
-                    logger.warning(
-                        "invalid grading json: finish_reason=%s usage=%s tail=%r",
-                        choice.finish_reason, resp.usage, raw[-100:],
-                    )
-                    raise
-            except Exception as exc:  # 网络错误与 JSON 校验失败统一重试
-                last_error = exc
-                logger.warning("grading attempt %d failed: %s", attempt + 1, exc)
-        raise GradingFailed(str(last_error))
+        try:
+            return chat_json(
+                self.client, self.model, SYSTEM_PROMPT,
+                USER_PROMPT_TEMPLATE.format(prompt_text=prompt_text, content=content),
+                GradingResult,
+            )
+        except LLMCallFailed as exc:
+            raise GradingFailed(str(exc)) from exc
 
 
 def build_grader():

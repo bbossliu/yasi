@@ -1,4 +1,4 @@
-from app.schemas import Annotation, BandScores, GradingResult
+from app.schemas import Annotation, BandScores, GradingResult, SpeakingBands, SpeakingResult
 
 SAMPLE_PROMPT_TITLE = "科技话题：远程办公"
 SAMPLE_PROMPT_TEXT = (
@@ -54,4 +54,34 @@ On the one hand, remote work eliminates the daily commute, allowing employees to
 On the other hand, working from home is not without its problems. The absence of face-to-face interaction may leave employees feeling isolated, which can erode team cohesion over time. Furthermore, the boundary between professional and private life tends to blur, with many people finding themselves working late into the night at the expense of their health. Some managers also worry that productivity may decline without direct supervision.
 
 In conclusion, although remote working poses challenges such as social isolation and blurred work-life boundaries, I believe its benefits are more significant. Companies should invest in training and clear policies to help employees adapt to this new mode of work.""",
+)
+
+SAMPLE_SPEAKING_QUESTION = "Do you prefer working from home or in an office?"
+
+SAMPLE_SPEAKING_RESULT = SpeakingResult(
+    bands=SpeakingBands(fluency=5.5, lexical=5.5, grammar=5.5, pronunciation=6.5, overall=5.5),
+    annotations=[
+        Annotation(
+            sentence_index=1,
+            original="First, people can save time because they don't need to, you know, take the bus or subway for two hours every day.",
+            issue="插入语 you know 与冗长从句打断流利度；通勤有地道词 commute。",
+            suggestion="First of all, people save a great deal of time because they no longer have to commute for two hours every day.",
+            error_type="流利度",
+        ),
+        Annotation(
+            sentence_index=3,
+            original="But sometimes I feel lonely, because I cannot talk with my colleagues face to face.",
+            issue="词汇简单重复 feel/talk；可用 isolated / interact in person 提升档次。",
+            suggestion="That said, I sometimes feel isolated because I can't interact with my colleagues in person.",
+            error_type="词汇搭配",
+        ),
+        Annotation(
+            sentence_index=4,
+            original="So I think it depends on the person, but for me the good things is more than the bad things.",
+            issue="主谓一致与表达中式：the good things is 应为 are；the pros outweigh the cons 更地道。",
+            suggestion="So it depends on the person, but for me the pros definitely outweigh the cons.",
+            error_type="主谓一致",
+        ),
+    ],
+    rewrite="""Well, to be honest, I'd say I prefer working from home. The biggest reason is that it saves me a huge amount of time — I used to spend nearly two hours commuting every day, and now I can use that time to exercise or just sleep a bit longer. On top of that, I find it much easier to concentrate at home because there are fewer distractions than in a busy office. Of course, I do miss chatting with my colleagues in person sometimes, but overall, for me, the benefits definitely outweigh the drawbacks.""",
 )
