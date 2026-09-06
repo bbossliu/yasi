@@ -497,6 +497,7 @@ class EssayOut(BaseModel):
     total_band: float | None
     prompt_title: str
     word_count: int
+    duration_sec: int
     created_at: datetime
 
 
@@ -648,14 +649,14 @@ SAMPLE_GRADING = GradingResult(
             error_type="词汇搭配",
         ),
         Annotation(
-            sentence_index=10,
+            sentence_index=11,
             original="Many people find themself working at midnight, which is bad for their health.",
             issue="单复数错误：themself 不是标准用法，主语为 many people，应为 themselves。",
             suggestion="Many people find themselves working at midnight, which is detrimental to their health.",
             error_type="单复数",
         ),
         Annotation(
-            sentence_index=11,
+            sentence_index=12,
             original="In addition, some managers think employees will be lazy without supervision.",
             issue="连接词单一：全文论证过渡仅依赖 Firstly/Secondly/In addition，缺乏更高阶的衔接手段。",
             suggestion="A further concern raised by some managers is that productivity may decline without direct supervision.",
@@ -684,6 +685,7 @@ class MockGrader:
     """无 DEEPSEEK_API_KEY 时的降级批改器：返回预置示例批改结果。"""
 
     model = "mock"
+    is_mock = True
 
     def grade(self, prompt_text: str, content: str) -> GradingResult:
         return SAMPLE_GRADING
@@ -1235,7 +1237,14 @@ def init_db() -> None:
         seed_db(session)
     finally:
         session.close()
+
+
+@app.get("/api/health")
+def health() -> dict:
+    return {"status": "ok"}
 ```
+
+> 注：实现时发现本替换文本曾遗漏 `/api/health`（会让 Task 1 的 test_health 变红），上方已补回；同时 `MockGrader` 需带 `is_mock = True`（已同步到 Task 4 代码块）。
 
 - [ ] **Step 6: 运行全部后端测试确认通过**
 
@@ -1333,6 +1342,7 @@ export interface EssayOut {
   total_band: number | null
   prompt_title: string
   word_count: number
+  duration_sec: number
   created_at: string
 }
 
@@ -1655,9 +1665,14 @@ export default function WritingPage() {
         <AnalysisBar content={content} />
       </div>
       {error && <div className="text-sm text-red-500">{error}</div>}
+      {countWords(content) > 500 && (
+        <div className="text-sm font-semibold text-red-500">
+          已超过 500 词上限（当前 {countWords(content)} 词），请精简后再提交
+        </div>
+      )}
       <button
         onClick={submit}
-        disabled={countWords(content) === 0 || submitting}
+        disabled={countWords(content) === 0 || countWords(content) > 500 || submitting}
         className="rounded-xl bg-indigo-600 px-6 py-3 font-semibold text-white disabled:opacity-40"
       >
         {submitting ? '提交中…' : '提交批改'}
@@ -2256,3 +2271,16 @@ git add -A && git commit -m "docs: README 与 env 示例，V1 完成" && git pus
 - 仪表盘简版（最新分/篇数/错误 TOP）✓
 - 示例系统（示例作文 + 完整批改结果，不写一字可体验）✓
 - 能力树地基：9 表齐、写作分支 20 节点种子、批改后标黄 ✓
+
+---
+
+## 附：实施偏差记录（执行期对计划的修正，均已通过任务审查）
+
+1. Task 4：示例作文原文 195 词与测试断言 200-320 词矛盾 → 结尾追加一句无错句至 203 词；后两条批注 sentence_index 差一 → 已修正为 11/12（代码块已同步）。
+2. Task 6：main.py 替换文本遗漏 `/api/health` → 已补回（代码块已同步）；`MockGrader` 缺 `is_mock = True` → 已补（代码块已同步）。
+3. Task 8：写作页遗漏 500 词前端拦截（全局约束要求前后端都校验）→ 已补 disabled 条件 + 红色提示（代码块已同步）。
+4. Task 9：`EssayOut` 前后端均缺 `duration_sec` 字段 → 各补一行（代码块已同步）。
+5. Task 11（真实链路验证后）：`LLMGrader` 加固——`max_tokens=8192`；重试 2→3 次；容忍未闭合 JSON（补 `}` 重 parse）；validate 失败时记录 `finish_reason`/`usage`/尾部内容。根因：deepseek-chat 在 json_object 模式偶发输出未闭合 JSON 且 finish_reason=stop。
+6. Task 11：SYSTEM_PROMPT 的 annotations 规则增加限量（最多 8 条、按严重程度排序、issue ≤50 字、suggestion 只给修改句）以压缩输出 token。
+7. 全局约束「失败重试 1 次」相应更新为「最多 3 次尝试」；README 前端要求为 Node >= 22（实测 v20 无法构建）。
+8. 逐句批注的"打字机"效果为前端拿到完整结果后按 600ms 间隔逐条浮现（规格 §4.3 写的 "SSE 或分段轮询" 未采用 SSE，视觉等价）。
