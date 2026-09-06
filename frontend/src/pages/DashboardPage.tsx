@@ -22,6 +22,7 @@ export default function DashboardPage() {
 
   const latest = essays.find((e) => e.total_band !== null && e.module === 'writing')
   const latestSpeaking = essays.find((e) => e.total_band !== null && e.module === 'speaking')
+  const latestListening = essays.find((e) => e.total_band !== null && e.module === 'listening')
   const topErrors = useMemo(() => {
     const counts = new Map<string, number>()
     for (const e of errors) counts.set(e.error_type, (counts.get(e.error_type) ?? 0) + 1)
@@ -68,6 +69,15 @@ export default function DashboardPage() {
           </Link>
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-6">
+          <div className="text-sm text-slate-400">听力最新正确率</div>
+          <div className="mt-1 text-3xl font-bold text-amber-600">
+            {latestListening ? `${latestListening.total_band}%` : '—'}
+          </div>
+          <Link to="/listening" className="mt-3 inline-block text-sm text-amber-600 hover:underline">
+            去精听 →
+          </Link>
+        </div>
+        <div className="rounded-xl border border-slate-200 bg-white p-6">
           <div className="text-sm text-slate-400">累计练习</div>
           <div className="mt-1 text-3xl font-bold">{essays.length} 次</div>
           <Link to="/write" className="mt-3 inline-block text-sm text-indigo-600 hover:underline">
@@ -91,7 +101,7 @@ export default function DashboardPage() {
         </div>
       </div>
       <div className="rounded-xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-400">
-        能力树、听力模块将在 V4 解锁
+        能力树点亮验证将在后续版本上线
       </div>
     </div>
   )

@@ -8,7 +8,7 @@ export function useEcharts(option: EChartsOption) {
   useEffect(() => {
     if (!ref.current) return
     const chart = echarts.init(ref.current)
-    chart.setOption(JSON.parse(optionJson))
+    chart.setOption(option)
     const onResize = () => chart.resize()
     window.addEventListener('resize', onResize)
     return () => {

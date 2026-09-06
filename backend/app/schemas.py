@@ -191,3 +191,43 @@ class ReviewSubmit(BaseModel):
 class ForecastOut(BaseModel):
     date: str
     count: int
+
+
+class MatListOut(BaseModel):
+    id: int
+    title: str
+    section: int
+    sentence_count: int
+    ready_count: int
+
+
+class MatDetailOut(BaseModel):
+    id: int
+    title: str
+    section: int
+    sentences: list[str]
+    ready_count: int
+
+
+class DictationSubmit(BaseModel):
+    material_id: int
+    answers: list[str]
+
+
+class DictationResultOut(BaseModel):
+    practice_id: int
+    accuracy: int
+    per_sentence: list[dict]
+
+
+class AttributionSubmit(BaseModel):
+    practice_id: int
+    sentence_index: int = Field(ge=0)
+    reason: str
+
+    @field_validator("reason")
+    @classmethod
+    def valid_reason(cls, v: str) -> str:
+        if v not in ("连读", "词汇", "口音", "注意力"):
+            raise ValueError("归因取值仅支持：连读/词汇/口音/注意力")
+        return v
