@@ -1,6 +1,6 @@
 # yasi
 
-AI 驱动的雅思私教（V1：写作 Task 2 智能批改）。
+AI 驱动的雅思私教（V1 写作批改 + V2 口语练习）。
 
 ## 快速开始
 
@@ -16,6 +16,8 @@ cd frontend
 npm install
 npm run dev                  # http://localhost:5173
 ```
+
+注意：V2 给 practice 表加了列，V1 时期生成的 `backend/yasi.db` 请删除后重建（开发期无迁移机制）。
 
 ### 端口占用
 
