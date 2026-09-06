@@ -97,3 +97,73 @@ def test_transcribe_failure_marks_needs_review(tmp_path):
     assert s.get(Practice, 99).status == "needs_review"
     assert s.scalars(select(AIFeedback)).all() == []
     s.close()
+
+
+PART3_QUESTIONS = ["Q1?", "Q2?", "Q3?"]
+
+
+def add_turn_practice(factory, practice_id, question):
+    s = factory()
+    s.add(Practice(id=practice_id, user_id=1, module="speaking", session_id=99,
+                   prompt_title="T", prompt_text=question, content="",
+                   audio_path="x.wav", status="pending"))
+    s.commit()
+    s.close()
+
+
+def run_turns(factory, count):
+    for i in range(count):
+        pid = 99 + i
+        if i > 0:
+            s = factory()
+            question = s.get(SpeakingSession, 99).current_question
+            s.close()
+            add_turn_practice(factory, pid, question)
+        run_speaking_turn(pid, factory, transcriber=FakeTranscriber(),
+                          grader=FakeSpeakingGrader())
+
+
+def test_part3_followup_after_preset_questions(tmp_path, monkeypatch):
+    factory = make_db(tmp_path)
+    seed(factory, part=3, questions=PART3_QUESTIONS)
+    monkeypatch.setattr("app.services.followup.generate_followup",
+                        lambda topic, history: "Why do you think so?")
+    run_turns(factory, 3)  # 耗完 3 个预设问
+    s = factory()
+    sess = s.get(SpeakingSession, 99)
+    assert sess.status == "active"
+    assert sess.turn_count == 3
+    assert sess.current_question == "Why do you think so?"
+    s.close()
+
+
+def test_part3_followup_failure_ends_session(tmp_path, monkeypatch):
+    factory = make_db(tmp_path)
+    seed(factory, part=3, questions=PART3_QUESTIONS)
+    monkeypatch.setattr("app.services.followup.generate_followup",
+                        lambda topic, history: None)
+    run_turns(factory, 3)
+    s = factory()
+    sess = s.get(SpeakingSession, 99)
+    assert sess.status == "done"
+    assert sess.current_question == ""
+    s.close()
+
+
+def test_part3_max_turns_stops_followup(tmp_path, monkeypatch):
+    factory = make_db(tmp_path)
+    seed(factory, part=3, questions=PART3_QUESTIONS)
+    calls = []
+
+    def fake_followup(topic, history):
+        calls.append((topic, history))
+        return "Why do you think so?"
+
+    monkeypatch.setattr("app.services.followup.generate_followup", fake_followup)
+    run_turns(factory, 5)  # 3 预设 + 2 追问，达到 PART3_MAX_TURNS
+    s = factory()
+    sess = s.get(SpeakingSession, 99)
+    assert sess.turn_count == 5
+    assert sess.status == "done"
+    s.close()
+    assert len(calls) == 2  # 第 4、5 轮各追问一次，第 5 轮后不再追问

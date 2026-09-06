@@ -84,6 +84,13 @@ def test_upload_validation(client):
                        files={"audio": ("a.mp3", b"fake", "audio/mpeg")})
     assert resp.status_code == 422
 
+    # 超过 5MB 上限
+    big = make_wav_bytes() + b"\x00" * (5 * 1024 * 1024 + 1)
+    resp = client.post("/api/speaking/turns",
+                       data={"session_id": str(sess["id"])},
+                       files={"audio": ("big.wav", big, "audio/wav")})
+    assert resp.status_code == 413
+
 
 def test_tts_filename_guard(client):
     assert client.get("/api/tts/../etc/passwd").status_code == 404

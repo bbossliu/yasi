@@ -51,7 +51,7 @@ export default function DashboardPage() {
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-6">
           <div className="text-sm text-slate-400">累计练习</div>
-          <div className="mt-1 text-3xl font-bold">{essays.length} 篇</div>
+          <div className="mt-1 text-3xl font-bold">{essays.length} 次</div>
           <Link to="/write" className="mt-3 inline-block text-sm text-indigo-600 hover:underline">
             开始新一篇 →
           </Link>
@@ -73,7 +73,7 @@ export default function DashboardPage() {
         </div>
       </div>
       <div className="rounded-xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-400">
-        能力树、口语 / 听力 / 词汇模块将在 V2-V4 解锁
+        能力树、听力 / 词汇模块将在 V3-V4 解锁
       </div>
     </div>
   )

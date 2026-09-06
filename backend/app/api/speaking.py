@@ -7,7 +7,7 @@ from fastapi.responses import FileResponse
 from sqlalchemy import select
 
 from app.config import settings
-from app.models import AIFeedback, Practice, SpeakingCard, SpeakingSession
+from app.models import Practice, SpeakingCard, SpeakingSession
 from app.schemas import (FeedbackOut, SessionCreate, SessionOut, SessionSummary,
                          SpeakingCardOut, TurnDetail, TurnSummaryItem)
 from app.services.speaking_grader import run_speaking_turn
