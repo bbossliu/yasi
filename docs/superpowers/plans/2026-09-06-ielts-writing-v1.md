@@ -648,14 +648,14 @@ SAMPLE_GRADING = GradingResult(
             error_type="词汇搭配",
         ),
         Annotation(
-            sentence_index=10,
+            sentence_index=11,
             original="Many people find themself working at midnight, which is bad for their health.",
             issue="单复数错误：themself 不是标准用法，主语为 many people，应为 themselves。",
             suggestion="Many people find themselves working at midnight, which is detrimental to their health.",
             error_type="单复数",
         ),
         Annotation(
-            sentence_index=11,
+            sentence_index=12,
             original="In addition, some managers think employees will be lazy without supervision.",
             issue="连接词单一：全文论证过渡仅依赖 Firstly/Secondly/In addition，缺乏更高阶的衔接手段。",
             suggestion="A further concern raised by some managers is that productivity may decline without direct supervision.",
