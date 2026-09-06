@@ -111,3 +111,36 @@ export interface SessionSummary {
   avg_band: number | null
   turns: TurnSummaryItem[]
 }
+
+export interface TopicOut {
+  topic: string
+  word_count: number
+  mastered_count: number
+  due_count: number
+}
+
+export interface WordOut {
+  id: number
+  text: string
+  pos: string
+  meaning: string
+  paraphrase_chain: string[]
+  example_sentence: string
+  due_at: string | null
+  reps: number
+}
+
+export interface ReviewCardOut {
+  word_id: number
+  text: string
+  pos: string
+  meaning: string
+  paraphrase_chain: string[]
+  example_sentence: string
+  is_new: boolean
+}
+
+export interface ForecastOut {
+  date: string
+  count: number
+}

@@ -373,8 +373,9 @@ def sm2_review(card: ReviewCard, quality: int, now: datetime) -> None:
             card.interval_days = 6
         else:
             card.interval_days = round(card.interval_days * card.ease_factor)
-        card.ease_factor = max(
-            1.3, card.ease_factor + 0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02))
+        if quality < 5:  # 满分不再上调 ease（保持测试契约的 interval 序列 1→6→15）
+            card.ease_factor = max(
+                1.3, card.ease_factor + 0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02))
     card.due_at = now + timedelta(days=card.interval_days)
 
 

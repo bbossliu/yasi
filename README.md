@@ -17,7 +17,7 @@ npm install
 npm run dev                  # http://localhost:5173
 ```
 
-注意：V2 给 practice 表加了列，V1 时期生成的 `backend/yasi.db` 请删除后重建（开发期无迁移机制）。
+注意：V2 给 practice 表加了列，V3 给 word 表加了 pos/meaning 列；旧版生成的 `backend/yasi.db` 请删除后重建（开发期无迁移机制）。
 
 ### 端口占用
 
@@ -39,6 +39,13 @@ cd frontend && npm run build
 - 录音在浏览器端编码为 16kHz WAV 上传；讯飞 key 未配置时使用演示转写
 - Part 3 由 AI 根据回答生成追问；提问语音由 edge-tts 生成（生成失败自动降级为文字）
 - 发音分项为间接评估，仅供参考
+
+## 词汇模块（V3）
+
+- 入口：`/vocab`，10 个雅思话题 × 20 核心词（释义 / 真题风格例句 / 同义替换链）
+- 复习采用 SM-2 间隔重复：认识 / 模糊 / 不认识三档自评自动调度下次复习
+- 写作、口语批改中的「词汇搭配」错误命中词库时会自动建复习卡（错词强制复现）
+- 扩充词库：配好 DEEPSEEK_API_KEY 后运行 `cd backend && uv run python scripts/generate_vocab.py`
 
 ## 结构
 

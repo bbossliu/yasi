@@ -41,6 +41,8 @@ class Word(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     text: Mapped[str] = mapped_column(String(100), unique=True)
+    pos: Mapped[str] = mapped_column(String(20), default="")
+    meaning: Mapped[str] = mapped_column(String(300), default="")
     topic: Mapped[str] = mapped_column(String(50), default="")
     paraphrase_chain: Mapped[list] = mapped_column(JSON, default=list)
     example_sentence: Mapped[str] = mapped_column(Text, default="")
