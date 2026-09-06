@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { NavBar } from './components/NavBar'
 import DashboardPage from './pages/DashboardPage'
 import HistoryPage from './pages/HistoryPage'
+import ListeningPage from './pages/ListeningPage'
 import PracticeRoom from './pages/PracticeRoom'
 import ResultPage from './pages/ResultPage'
 import SpeakingPage from './pages/SpeakingPage'
@@ -20,6 +21,7 @@ export default function App() {
             <Route path="/result/:id" element={<ResultPage />} />
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/speaking" element={<SpeakingPage />} />
+            <Route path="/listening" element={<ListeningPage />} />
             <Route path="/vocab" element={<VocabPage />} />
             <Route path="/speaking/session/:id" element={<PracticeRoom />} />
           </Routes>

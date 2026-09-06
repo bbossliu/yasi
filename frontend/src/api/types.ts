@@ -144,3 +144,37 @@ export interface ForecastOut {
   date: string
   count: number
 }
+
+export interface MatListOut {
+  id: number
+  title: string
+  section: number
+  sentence_count: number
+  ready_count: number
+}
+
+export interface MatDetailOut {
+  id: number
+  title: string
+  section: number
+  sentences: string[]
+  ready_count: number
+}
+
+export interface DiffToken {
+  type: 'ok' | 'missing' | 'wrong' | 'extra'
+  ref: string
+  hyp: string
+}
+
+export interface DictationResultOut {
+  practice_id: number
+  accuracy: number
+  per_sentence: { diff: { tokens: DiffToken[]; correct: boolean }; correct: boolean }[]
+}
+
+export interface ShadowingResult {
+  transcript: string
+  diff: { tokens: DiffToken[]; correct: boolean }
+  is_mock: boolean
+}

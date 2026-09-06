@@ -1,13 +1,17 @@
 import type {
+  DictationResultOut,
   EssayCreate,
   EssayDetail,
   EssayOut,
   ErrorItemOut,
   ForecastOut,
+  MatDetailOut,
+  MatListOut,
   PromptOut,
   ReviewCardOut,
   SessionOut,
   SessionSummary,
+  ShadowingResult,
   SpeakingCardOut,
   TopicOut,
   TurnDetail,
@@ -102,4 +106,39 @@ export function submitReview(wordId: number, quality: 1 | 3 | 5): Promise<{ next
 
 export function getVocabForecast(): Promise<ForecastOut[]> {
   return request('/vocab/forecast')
+}
+
+export function listListeningMaterials(): Promise<MatListOut[]> {
+  return request('/listening/materials')
+}
+
+export function getListeningMaterial(id: number): Promise<MatDetailOut> {
+  return request(`/listening/materials/${id}`)
+}
+
+export function requestListeningAudio(id: number): Promise<{ status: string; ready_count: number; total: number }> {
+  return request(`/listening/materials/${id}/audio`, { method: 'POST' })
+}
+
+export function submitDictation(materialId: number, answers: string[]): Promise<DictationResultOut> {
+  return request('/listening/dictation', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ material_id: materialId, answers }),
+  })
+}
+
+export function submitShadowing(materialId: number, audio: Blob): Promise<ShadowingResult> {
+  const form = new FormData()
+  form.append('material_id', String(materialId))
+  form.append('audio', audio, 'shadow.wav')
+  return request('/listening/shadowing', { method: 'POST', body: form })
+}
+
+export function submitAttribution(practiceId: number, sentenceIndex: number, reason: string): Promise<{ id: number }> {
+  return request('/listening/attribution', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ practice_id: practiceId, sentence_index: sentenceIndex, reason }),
+  })
 }
