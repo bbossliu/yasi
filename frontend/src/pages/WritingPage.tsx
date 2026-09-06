@@ -80,9 +80,14 @@ export default function WritingPage() {
         <AnalysisBar content={content} />
       </div>
       {error && <div className="text-sm text-red-500">{error}</div>}
+      {countWords(content) > 500 && (
+        <div className="text-sm font-semibold text-red-500">
+          已超过 500 词上限（当前 {countWords(content)} 词），请精简后再提交
+        </div>
+      )}
       <button
         onClick={submit}
-        disabled={countWords(content) === 0 || submitting}
+        disabled={countWords(content) === 0 || countWords(content) > 500 || submitting}
         className="rounded-xl bg-indigo-600 px-6 py-3 font-semibold text-white disabled:opacity-40"
       >
         {submitting ? '提交中…' : '提交批改'}
