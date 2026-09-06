@@ -2283,3 +2283,4 @@ git add -A && git commit -m "docs: README 与 env 示例，V1 完成" && git pus
 5. Task 11（真实链路验证后）：`LLMGrader` 加固——`max_tokens=8192`；重试 2→3 次；容忍未闭合 JSON（补 `}` 重 parse）；validate 失败时记录 `finish_reason`/`usage`/尾部内容。根因：deepseek-chat 在 json_object 模式偶发输出未闭合 JSON 且 finish_reason=stop。
 6. Task 11：SYSTEM_PROMPT 的 annotations 规则增加限量（最多 8 条、按严重程度排序、issue ≤50 字、suggestion 只给修改句）以压缩输出 token。
 7. 全局约束「失败重试 1 次」相应更新为「最多 3 次尝试」；README 前端要求为 Node >= 22（实测 v20 无法构建）。
+8. 逐句批注的"打字机"效果为前端拿到完整结果后按 600ms 间隔逐条浮现（规格 §4.3 写的 "SSE 或分段轮询" 未采用 SSE，视觉等价）。
