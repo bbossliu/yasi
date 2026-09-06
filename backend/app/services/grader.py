@@ -25,7 +25,7 @@ class LLMGrader:
 
     def grade(self, prompt_text: str, content: str) -> GradingResult:
         last_error: Exception | None = None
-        for attempt in range(2):
+        for attempt in range(3):
             try:
                 resp = self.client.chat.completions.create(
                     model=self.model,
@@ -39,12 +39,19 @@ class LLMGrader:
                     max_tokens=8192,
                 )
                 choice = resp.choices[0]
+                content = choice.message.content or ""
                 try:
-                    return GradingResult.model_validate_json(choice.message.content)
+                    return GradingResult.model_validate_json(content)
                 except Exception:
+                    stripped = content.rstrip()
+                    if stripped and not stripped.endswith("}"):
+                        try:
+                            return GradingResult.model_validate_json(stripped + "}")
+                        except Exception:
+                            pass
                     logger.warning(
                         "invalid grading json: finish_reason=%s usage=%s tail=%r",
-                        choice.finish_reason, resp.usage, (choice.message.content or "")[-100:],
+                        choice.finish_reason, resp.usage, content[-100:],
                     )
                     raise
             except Exception as exc:  # 网络错误与 JSON 校验失败统一重试
