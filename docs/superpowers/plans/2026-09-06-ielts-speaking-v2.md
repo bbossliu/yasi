@@ -541,7 +541,7 @@ git add backend/ && git commit -m "feat: 口语评分 schema/prompt/示例 + 通
   - `SpeakingCard`（`id, part: int, topic: str, season: str, payload: dict, created_at`）
   - `SpeakingSession`（`id, user_id, card_id, status: str(active/done), current_question: str, turn_count: int, created_at`，relationship `card`）
   - `Practice.audio_path: str = ""`、`Practice.session_id: int | None`（FK speaking_session.id）
-  - `seed_speaking_db(session)`（幂等）：写入 SPEAKING_CARDS（Part1×5、Part2×8、Part3×5，season="2026-09"）+ 口语能力树 16 节点（`speaking.` 前缀）
+  - `seed_speaking_db(session)`（幂等）：写入 SPEAKING_CARDS（Part1×5、Part2×8、Part3×5，season="2026-09"）+ 口语能力树 18 节点（`speaking.` 前缀）
 
 - [ ] **Step 1: 写失败测试**
 
@@ -593,7 +593,7 @@ def test_seed_speaking_idempotent(tmp_path):
     from app.models import SkillNode
     speaking_nodes = s.scalars(
         select(SkillNode).where(SkillNode.code.like("speaking.%"))).all()
-    assert len(speaking_nodes) == 16
+    assert len(speaking_nodes) == 18
     assert all(n.module == "speaking" for n in speaking_nodes)
     s.close()
 ```
