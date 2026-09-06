@@ -54,3 +54,20 @@ def test_iflytek_parse_result_json():
     result = t._parse_order_result(order_result)
     assert result.text == "Well I think"
     assert 0 < result.confidence <= 1
+
+
+def test_iflytek_parse_result_json_with_cw():
+    t = IFlytekTranscriber("a", "s")
+    # 真实 API 结构：词被 cw 候选数组包裹（ws[].cw[].w），且可能只有 lattice
+    order_result = json.dumps({
+        "lattice": [
+            {"json_1best": {"st": {"rt": [{"ws": [
+                {"cw": [{"w": "I", "wp": "n"}]},
+                {"cw": [{"w": " ", "wp": "s"}]},
+                {"cw": [{"w": "agree", "wp": "n"}]}
+            ]}], "sc": 92}}}
+        ]
+    })
+    result = t._parse_order_result(order_result)
+    assert result.text == "I agree"
+    assert 0 < result.confidence <= 1

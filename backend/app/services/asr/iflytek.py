@@ -35,13 +35,14 @@ class IFlytekTranscriber:
         data = json.loads(order_result)
         words: list[str] = []
         scores: list[float] = []
-        for lattice in data.get("lattice2", []):
+        for lattice in data.get("lattice2") or data.get("lattice", []):
             st = lattice["json_1best"]["st"]
             if st.get("sc"):
                 scores.append(float(st["sc"]))
             for rt in st.get("rt", []):
                 for ws in rt.get("ws", []):
-                    words.append(ws["w"])
+                    for cw in ws.get("cw", [ws]):
+                        words.append(cw["w"])
         text = "".join(words).strip()
         # 讯飞按词给出空格分隔的 wp=s 占位，清掉多余空白
         text = " ".join(text.split())
@@ -49,10 +50,10 @@ class IFlytekTranscriber:
         return TranscriptResult(text=text, confidence=round(confidence, 2))
 
     def transcribe(self, audio_path: str) -> TranscriptResult:
-        with open(audio_path, "rb") as f:
-            audio = f.read()
-        ts = str(int(time.time()))
         try:
+            with open(audio_path, "rb") as f:
+                audio = f.read()
+            ts = str(int(time.time()))
             with httpx.Client(trust_env=False, timeout=30.0) as client:
                 resp = client.post(API_UPLOAD, data={
                     "appId": self.app_id,
@@ -61,6 +62,7 @@ class IFlytekTranscriber:
                     "fileSize": str(len(audio)),
                     "fileName": "audio.wav",
                     "duration": str(self._audio_duration_ms(audio_path)),
+                    "language": "en",
                 }, files={"content": ("audio.wav", audio, "audio/wav")})
                 body = resp.json()
                 if body.get("code") != "000000":
