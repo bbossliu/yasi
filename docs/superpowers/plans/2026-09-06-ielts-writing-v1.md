@@ -497,6 +497,7 @@ class EssayOut(BaseModel):
     total_band: float | None
     prompt_title: str
     word_count: int
+    duration_sec: int
     created_at: datetime
 
 
@@ -1341,6 +1342,7 @@ export interface EssayOut {
   total_band: number | null
   prompt_title: string
   word_count: number
+  duration_sec: number
   created_at: string
 }
 
