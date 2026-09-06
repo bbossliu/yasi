@@ -40,6 +40,13 @@ cd frontend && npm run build
 - Part 3 由 AI 根据回答生成追问；提问语音由 edge-tts 生成（生成失败自动降级为文字）
 - 发音分项为间接评估，仅供参考
 
+## 词汇模块（V3）
+
+- 入口：`/vocab`，10 个雅思话题 × 20 核心词（释义 / 真题风格例句 / 同义替换链）
+- 复习采用 SM-2 间隔重复：认识 / 模糊 / 不认识三档自评自动调度下次复习
+- 写作、口语批改中的「词汇搭配」错误命中词库时会自动建复习卡（错词强制复现）
+- 扩充词库：配好 DEEPSEEK_API_KEY 后运行 `cd backend && uv run python scripts/generate_vocab.py`
+
 ## 结构
 
 - `backend/` FastAPI + SQLAlchemy 2.0 + SQLite；批改管线在 `app/services/grader.py`
