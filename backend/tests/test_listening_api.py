@@ -23,6 +23,7 @@ def client(tmp_path, monkeypatch):
     monkeypatch.setattr("app.config.settings.iflytek_app_id", "")
     monkeypatch.setattr("app.config.settings.iflytek_api_secret", "")
     monkeypatch.setattr("app.config.settings.listening_audio_dir", str(tmp_path / "la"))
+    monkeypatch.setattr("app.config.settings.uploads_dir", str(tmp_path / "up"))
     monkeypatch.setattr(app.state, "session_factory", factory)
     return TestClient(app)
 
