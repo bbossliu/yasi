@@ -80,6 +80,8 @@ class Practice(Base):
     duration_sec: Mapped[int] = mapped_column(Integer, default=0)
     status: Mapped[str] = mapped_column(String(20), default="pending")  # pending/done/needs_review
     total_band: Mapped[float | None] = mapped_column(Float, nullable=True)
+    audio_path: Mapped[str] = mapped_column(String(500), default="")
+    session_id: Mapped[int | None] = mapped_column(ForeignKey("speaking_session.id"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
     feedback: Mapped["AIFeedback | None"] = relationship(back_populates="practice")
@@ -120,3 +122,30 @@ class MockExam(Base):
     predicted_band: Mapped[float | None] = mapped_column(Float, nullable=True)
     report: Mapped[str] = mapped_column(Text, default="")
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
+class SpeakingCard(Base):
+    __tablename__ = "speaking_card"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    part: Mapped[int] = mapped_column(Integer)  # 1/2/3
+    topic: Mapped[str] = mapped_column(String(300))
+    season: Mapped[str] = mapped_column(String(20), default="2026-09")
+    payload: Mapped[dict] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+    sessions: Mapped[list["SpeakingSession"]] = relationship(back_populates="card")
+
+
+class SpeakingSession(Base):
+    __tablename__ = "speaking_session"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), default=1)
+    card_id: Mapped[int] = mapped_column(ForeignKey("speaking_card.id"))
+    status: Mapped[str] = mapped_column(String(20), default="active")  # active/done
+    current_question: Mapped[str] = mapped_column(Text, default="")
+    turn_count: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+    card: Mapped[SpeakingCard] = relationship(back_populates="sessions")

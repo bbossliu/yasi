@@ -14,7 +14,7 @@ V1 已交付写作 Task 2 批改闭环（practice/ai_feedback/error_item 三表�
 
 | 决策点 | 结论 |
 |---|---|
-| ASR 方案 | 国产 ASR API，provider = **讯飞开放平台**（语音转写 HTTP API，HMAC-SHA256 签名） |
+| ASR 方案 | 国产 ASR API，provider = **讯飞开放平台**（语音转写 HTTP API，HMAC-SHA1 签名（raasr 实际算法）） |
 | ASR 配置 | `.env`：`IFLYTEK_APP_ID / IFLYTEK_API_SECRET / IFLYTEK_API_KEY`；缺失时自动降级 MockTranscriber |
 | V2 范围 | 完整版：Part 1/2/3 三入口 + 多轮 AI 考官对话 + edge-tts 语音提问 |
 | 对话推进 | Part 1 按预设问题序列；Part 3 由 DeepSeek 基于用户回答转写生成追问；每轮回答独立评分 |
@@ -75,7 +75,7 @@ GET  /api/tts/{question_hash}.mp3        TTS 音频静态服务
 
 **评分管线**（与 V1 `run_grading` 对称）：转写失败 → `needs_review`；DeepSeek validate 失败 → 补 `}` 重 parse + 最多 3 次重试（沿用 V1 加固）；成功 → 写 `ai_feedback`（is_mock 标记）+ `error_item` + 口语能力点标黄（`mark_speaking_learned`，按 module="speaking"）。
 
-**边界**：音频 ≤ 5MB、时长 ≤ 3 分钟（前端 MediaRecorder 超时自动停止 + 后端大小校验 413）；Part 3 追问生成失败时回退到预设序列下一题。
+**边界**：音频 ≤ 5MB、时长 ≤ 3 分钟（前端 MediaRecorder 超时自动停止 + 后端大小校验 413）；Part 3 预设问用完后由 LLM 追问；追问生成失败时会话正常结束。
 
 ## 5. 前端改动
 

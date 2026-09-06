@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom'
 const links = [
   { to: '/', label: '仪表盘' },
   { to: '/write', label: '写作练习' },
+  { to: '/speaking', label: '口语练习' },
   { to: '/history', label: '历史记录' },
 ]
 

@@ -11,7 +11,7 @@ export default function HistoryPage() {
     listEssays().then(setEssays).catch(() => setEssays([]))
   }, [])
 
-  const graded = essays.filter((e) => e.total_band !== null)
+  const graded = essays.filter((e) => e.total_band !== null && e.module === 'writing')
   const ref = useEcharts({
     xAxis: {
       type: 'category',
@@ -55,9 +55,16 @@ export default function HistoryPage() {
             {essays.map((e) => (
               <tr key={e.id} className="border-t border-slate-100">
                 <td className="px-4 py-2">
-                  <Link to={`/result/${e.id}`} className="text-indigo-600 hover:underline">
-                    {e.prompt_title}
-                  </Link>
+                  <span className={`mr-2 rounded px-1.5 py-0.5 text-xs ${
+                    e.module === 'speaking' ? 'bg-emerald-100 text-emerald-700' : 'bg-indigo-100 text-indigo-700'
+                  }`}>{e.module === 'speaking' ? '口语' : '写作'}</span>
+                  {e.module === 'speaking' ? (
+                    e.prompt_title
+                  ) : (
+                    <Link to={`/result/${e.id}`} className="text-indigo-600 hover:underline">
+                      {e.prompt_title}
+                    </Link>
+                  )}
                 </td>
                 <td className="px-4 py-2">{e.word_count}</td>
                 <td className="px-4 py-2">{Math.round(e.duration_sec / 60)} 分钟</td>

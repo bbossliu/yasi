@@ -8,6 +8,11 @@ class Settings(BaseSettings):
     deepseek_base_url: str = "https://api.deepseek.com"
     deepseek_model: str = "deepseek-chat"
     database_url: str = "sqlite:///./yasi.db"
+    iflytek_app_id: str = ""
+    iflytek_api_secret: str = ""
+    iflytek_api_key: str = ""  # 预留（流式接口用）
+    uploads_dir: str = "uploads"
+    tts_cache_dir: str = "tts_cache"
 
 
 settings = Settings()

@@ -9,6 +9,8 @@ dependencies = [
     "pydantic>=2.7",
     "pydantic-settings>=2.3",
     "openai>=1.40",
+    "edge-tts>=7",
+    "python-multipart>=0.0.32",
 ]
 
 [dependency-groups]

@@ -12,6 +12,7 @@ export interface EssayCreate {
 
 export interface EssayOut {
   id: number
+  module: string
   status: 'pending' | 'done' | 'needs_review'
   total_band: number | null
   prompt_title: string
@@ -55,4 +56,58 @@ export interface EssayDetail extends EssayOut {
   content: string
   feedback: FeedbackOut | null
   errors: ErrorItemOut[]
+}
+
+export interface SpeakingCardOut {
+  id: number
+  part: number
+  topic: string
+  season: string
+  payload: { questions?: string[]; cues?: string[] }
+}
+
+export interface SessionOut {
+  id: number
+  part: number
+  topic: string
+  status: 'active' | 'done'
+  question: string
+  tts_url: string | null
+}
+
+export interface SpeakingBands {
+  fluency: number
+  lexical: number
+  grammar: number
+  pronunciation: number
+  overall: number
+}
+
+export interface SpeakingFeedback {
+  bands: SpeakingBands
+  annotations: Annotation[]
+  rewrite: string
+  is_mock: boolean
+}
+
+export interface TurnDetail {
+  practice_id: number
+  status: 'pending' | 'done' | 'needs_review'
+  transcript: string | null
+  feedback: SpeakingFeedback | null
+  next_question: string | null
+  next_tts_url: string | null
+  session_done: boolean
+}
+
+export interface TurnSummaryItem {
+  question: string
+  transcript: string
+  total_band: number | null
+}
+
+export interface SessionSummary {
+  session_id: number
+  avg_band: number | null
+  turns: TurnSummaryItem[]
 }
