@@ -1,4 +1,14 @@
-import type { EssayCreate, EssayDetail, EssayOut, ErrorItemOut, PromptOut } from './types'
+import type {
+  EssayCreate,
+  EssayDetail,
+  EssayOut,
+  ErrorItemOut,
+  PromptOut,
+  SessionOut,
+  SessionSummary,
+  SpeakingCardOut,
+  TurnDetail,
+} from './types'
 
 const BASE = '/api'
 
@@ -37,4 +47,31 @@ export function getEssay(id: number): Promise<EssayDetail> {
 
 export function listErrors(): Promise<ErrorItemOut[]> {
   return request('/errors')
+}
+
+export function listSpeakingCards(part: number): Promise<SpeakingCardOut[]> {
+  return request(`/speaking/cards?part=${part}`)
+}
+
+export function createSpeakingSession(cardId: number): Promise<SessionOut> {
+  return request('/speaking/sessions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ card_id: cardId }),
+  })
+}
+
+export function submitSpeakingTurn(sessionId: number, audio: Blob): Promise<{ practice_id: number }> {
+  const form = new FormData()
+  form.append('session_id', String(sessionId))
+  form.append('audio', audio, 'answer.wav')
+  return request('/speaking/turns', { method: 'POST', body: form })
+}
+
+export function getSpeakingTurn(practiceId: number): Promise<TurnDetail> {
+  return request(`/speaking/turns/${practiceId}`)
+}
+
+export function finishSpeakingSession(id: number): Promise<SessionSummary> {
+  return request(`/speaking/sessions/${id}/finish`, { method: 'POST' })
 }
