@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.essays import router as essays_router
+from app.api.listening import router as listening_router
 from app.api.speaking import router as speaking_router
 from app.api.vocab import router as vocab_router
 from app.config import settings
@@ -18,6 +19,7 @@ app.add_middleware(
 
 app.state.session_factory = make_session_factory(settings.database_url)
 app.include_router(essays_router)
+app.include_router(listening_router)
 app.include_router(speaking_router)
 app.include_router(vocab_router)
 
