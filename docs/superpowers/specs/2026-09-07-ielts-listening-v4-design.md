@@ -14,7 +14,7 @@
 | 决策点 | 结论 |
 |---|---|
 | 素材来源 | **不打包剑桥真题**（版权）。种子 6 篇 AI 风格精听材料（Section 2/3/4 学术场景各 2 篇，每篇 8-12 句，手写文本 + edge-tts 预生成音频） |
-| 音频生成 | 启动时检查 `listening_mat.audio_path` 文件存在性，缺失则用 edge-tts 懒生成（后台、可失败重试）；生成失败前端显示"音频生成中/不可用"，文本练习仍可用 |
+| 音频生成 | **逐句生成**（edge-tts 每句一个 mp3，存 `backend/listening_audio/{mat_id}/{idx}.mp3`）——这样单句循环不需要词级时间戳，直接播单句文件；首次打开素材时前端触发后台批量生成，前端轮询就绪进度；生成失败该句显示"音频不可用"，文本练习仍可用 |
 | 听写比对 | 后端 API 用 rapidfuzz 做词级 diff（对齐后标注 missing/wrong/extra），返回结构化 diff；连读点不做音频级分析，靠归因标签沉淀 |
 | 跟读比对 | 复用 V2 ASR 适配器（讯飞/Mock）转写后跟读录音 → 同一 diff 服务与原文比对 |
 | 错题归因 | 前端在 diff 结果句上提供四选一归因按钮；写入 `error_item`（error_type 前缀 `听力:`），复用 V1 错误库与仪表盘 TOP 统计 |
@@ -52,8 +52,9 @@ backend/app/
 
 ```
 GET  /api/listening/materials                 [{id, title, section, sentence_count, has_audio}]
-GET  /api/listening/materials/{id}            {id, title, section, audio_url, sentences: [...]}
-POST /api/listening/materials/{id}/audio      触发/查询音频生成 → {audio_url} | {status: "unavailable"}
+GET  /api/listening/materials/{id}            {id, title, section, sentences: [...], ready_count, total}
+POST /api/listening/materials/{id}/audio      后台批量生成逐句音频 → {status: "started"|"ready", ready_count, total}
+GET  /api/listening/audio/{mat_id}/{idx}.mp3  单句音频（不存在 404）
 POST /api/listening/dictation                 {material_id, answers: [str...]} → {accuracy(0-100), per_sentence: [{diff, correct}], practice_id}
 POST /api/listening/shadowing                 multipart: material_id + 音频 → 转写 → 与全文比对 → {transcript, diff, is_mock}
 POST /api/listening/attribution               {practice_id, sentence_index, reason} → 写 error_item（error_type="听力:连读|词汇|口音|注意力"）
