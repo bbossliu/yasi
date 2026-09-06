@@ -31,6 +31,8 @@ def init_db() -> None:
             session.add(User(id=1, target_band=6.5))
             session.commit()
         seed_db(session)
+        from app.seed_speaking import seed_speaking_db
+        seed_speaking_db(session)
     finally:
         session.close()
 
