@@ -11,6 +11,7 @@ dependencies = [
     "openai>=1.40",
     "edge-tts>=7",
     "python-multipart>=0.0.32",
+    "rapidfuzz>=3",
 ]
 
 [dependency-groups]
