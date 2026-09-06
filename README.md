@@ -31,6 +31,13 @@ cd backend && uv run pytest -v
 cd frontend && npm run build
 ```
 
+## 口语模块（V2）
+
+- 入口：`/speaking`，Part 1/2/3 三个部分，当季（2026-09）题库
+- 录音在浏览器端编码为 16kHz WAV 上传；讯飞 key 未配置时使用演示转写
+- Part 3 由 AI 根据回答生成追问；提问语音由 edge-tts 生成（生成失败自动降级为文字）
+- 发音分项为间接评估，仅供参考
+
 ## 结构
 
 - `backend/` FastAPI + SQLAlchemy 2.0 + SQLite；批改管线在 `app/services/grader.py`
