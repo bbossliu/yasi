@@ -1177,7 +1177,7 @@ def tts_url_for(text: str) -> str | None:
         return None
 ```
 
-`pyproject.toml` dependencies 追加 `"edge-tts>=7"`，然后 `uv sync`（unset 代理）。
+`pyproject.toml` dependencies 追加 `"edge-tts>=7"` 和 `"python-multipart>=0.0.32"`（FastAPI Form/File 的硬依赖，Task 5 需要），然后 `uv sync`（unset 代理）。
 
 - [ ] **Step 6: 测试通过 + 全套回归**
 
