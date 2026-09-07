@@ -122,7 +122,8 @@ class MockExam(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), default=1)
     scores: Mapped[dict] = mapped_column(JSON, default=dict)
     predicted_band: Mapped[float | None] = mapped_column(Float, nullable=True)
-    report: Mapped[str] = mapped_column(Text, default="")
+    practice_ids: Mapped[list] = mapped_column(JSON, default=list)
+    report: Mapped[dict] = mapped_column(JSON, default=dict)  # 由 Text 改为 JSON（薄弱点报告是结构化数据）
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
 

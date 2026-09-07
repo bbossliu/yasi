@@ -264,3 +264,18 @@ class TargetBandUpdate(BaseModel):
         if v not in (6.0, 6.5, 7.0, 7.5):
             raise ValueError("目标分仅支持 6.0/6.5/7.0/7.5")
         return v
+
+
+class ExamComplete(BaseModel):
+    practice_ids: list[int]
+
+
+class ExamOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    scores: dict
+    predicted_band: float | None
+    report: dict
+    practice_ids: list[int]
+    created_at: datetime
