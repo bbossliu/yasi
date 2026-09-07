@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import {
   createSpeakingSession, finishSpeakingSession, getReviewQueue, getSpeakingTurn,
   listListeningMaterials, listPrompts, submitDictation, submitEssay,
-  submitReview, submitSpeakingTurn, getListeningMaterial,
+  submitReview, submitSpeakingTurn, getListeningMaterial, requestListeningAudio,
 } from '../api/client'
 import type { MatDetailOut, ReviewCardOut } from '../api/types'
 import { WavRecorder } from '../lib/recorder'
@@ -13,6 +13,7 @@ export function ExamWritingStep({ onDone }: { onDone: (practiceId: number) => vo
   const [content, setContent] = useState('')
   const [secondsLeft, setSecondsLeft] = useState(40 * 60)
   const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
   const startRef = useRef(Date.now())
 
   useEffect(() => {
@@ -34,14 +35,22 @@ export function ExamWritingStep({ onDone }: { onDone: (practiceId: number) => vo
         prompt_title: p.title, prompt_text: p.text, content,
         duration_sec: Math.round((Date.now() - startRef.current) / 1000),
       })
-      // 等批改完成再进下一步（轮询）
+      // 等批改完成再进下一步（轮询，最多 30 次 × 2s）
       const { getEssay } = await import('../api/client')
       let detail = await getEssay(essay.id)
-      while (detail.status === 'pending') {
+      let polls = 0
+      while (detail.status === 'pending' && polls < 30) {
         await new Promise((r) => setTimeout(r, 2000))
         detail = await getEssay(essay.id)
+        polls++
+      }
+      if (detail.status === 'pending') {
+        setError('批改超时，请稍后重试')
+        return
       }
       onDone(essay.id)
+    } catch (e) {
+      setError(String(e))
     } finally {
       setBusy(false)
     }
@@ -69,6 +78,7 @@ export function ExamWritingStep({ onDone }: { onDone: (practiceId: number) => vo
         value={content}
         onChange={(e) => setContent(e.target.value)}
       />
+      {error && <div className="text-sm text-red-500">{error}</div>}
       <button onClick={submit} disabled={busy || content.trim().split(/\s+/).length < 30}
         className="w-full rounded-xl bg-indigo-600 py-3 font-semibold text-white disabled:opacity-40">
         {busy ? '批改中…' : '提交并进入下一环节'}
@@ -164,8 +174,19 @@ export function ExamListeningStep({ onDone }: { onDone: (practiceId: number) => 
   useEffect(() => {
     (async () => {
       const mats = await listListeningMaterials()
+      const ready = mats.filter((m) => m.ready_count > 0)
+      const readyS4 = ready.filter((m) => m.section === 4)
+      const pool = readyS4.length ? readyS4 : ready
+      if (pool.length) {
+        const pick = pool[Math.floor(Math.random() * pool.length)]
+        const detail = await getListeningMaterial(pick.id)
+        setMat(detail)
+        setAnswers(detail.sentences.map(() => ''))
+        return
+      }
       const s4 = mats.filter((m) => m.section === 4)
       const pick = (s4.length ? s4 : mats)[Math.floor(Math.random() * (s4.length ? s4.length : mats.length))]
+      await requestListeningAudio(pick.id)
       const detail = await getListeningMaterial(pick.id)
       setMat(detail)
       setAnswers(detail.sentences.map(() => ''))
