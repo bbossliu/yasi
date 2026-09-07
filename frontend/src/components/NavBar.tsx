@@ -6,6 +6,8 @@ const links = [
   { to: '/speaking', label: '口语练习' },
   { to: '/listening', label: '听力' },
   { to: '/vocab', label: '词汇' },
+  { to: '/skills', label: '能力树' },
+  { to: '/mock', label: '模考' },
   { to: '/history', label: '历史记录' },
 ]
 

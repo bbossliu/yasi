@@ -178,3 +178,34 @@ export interface ShadowingResult {
   diff: { tokens: DiffToken[]; correct: boolean }
   is_mock: boolean
 }
+
+export interface SkillNodeOut {
+  id: number
+  code: string
+  title: string
+  parent_id: number | null
+  status: 'unseen' | 'learned' | 'verified'
+  can_verify: boolean
+  sort_order: number
+}
+
+export interface ModuleTree {
+  module: string
+  nodes: SkillNodeOut[]
+}
+
+export interface ClearanceOut {
+  module: string
+  cleared: boolean
+  detail: string
+  mastery_rate: number
+}
+
+export interface ExamOut {
+  id: number
+  scores: Record<string, number>
+  predicted_band: number | null
+  report: { top_errors: { type: string; count: number }[]; weak_nodes: { code: string; title: string }[] } | string
+  practice_ids: number[]
+  created_at: string
+}

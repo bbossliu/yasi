@@ -3,8 +3,10 @@ import { NavBar } from './components/NavBar'
 import DashboardPage from './pages/DashboardPage'
 import HistoryPage from './pages/HistoryPage'
 import ListeningPage from './pages/ListeningPage'
+import MockExamPage from './pages/MockExamPage'
 import PracticeRoom from './pages/PracticeRoom'
 import ResultPage from './pages/ResultPage'
+import SkillTreePage from './pages/SkillTreePage'
 import SpeakingPage from './pages/SpeakingPage'
 import VocabPage from './pages/VocabPage'
 import WritingPage from './pages/WritingPage'
@@ -23,6 +25,8 @@ export default function App() {
             <Route path="/speaking" element={<SpeakingPage />} />
             <Route path="/listening" element={<ListeningPage />} />
             <Route path="/vocab" element={<VocabPage />} />
+            <Route path="/skills" element={<SkillTreePage />} />
+            <Route path="/mock" element={<MockExamPage />} />
             <Route path="/speaking/session/:id" element={<PracticeRoom />} />
           </Routes>
         </main>
