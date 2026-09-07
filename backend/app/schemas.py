@@ -231,3 +231,36 @@ class AttributionSubmit(BaseModel):
         if v not in ("连读", "词汇", "口音", "注意力"):
             raise ValueError("归因取值仅支持：连读/词汇/口音/注意力")
         return v
+
+
+class SkillNodeOut(BaseModel):
+    id: int
+    code: str
+    title: str
+    parent_id: int | None
+    status: str  # unseen/learned/verified
+    can_verify: bool
+    sort_order: int
+
+
+class ModuleTree(BaseModel):
+    module: str
+    nodes: list[SkillNodeOut]
+
+
+class ClearanceOut(BaseModel):
+    module: str
+    cleared: bool
+    detail: str
+    mastery_rate: float
+
+
+class TargetBandUpdate(BaseModel):
+    target_band: float
+
+    @field_validator("target_band")
+    @classmethod
+    def valid_target(cls, v: float) -> float:
+        if v not in (6.0, 6.5, 7.0, 7.5):
+            raise ValueError("目标分仅支持 6.0/6.5/7.0/7.5")
+        return v
