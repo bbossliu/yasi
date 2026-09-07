@@ -55,7 +55,7 @@ function estimateBand(src: EstimateSource): number | null {
   if (src.writing !== null) bands.push(src.writing)
   if (src.speaking !== null) bands.push(src.speaking)
   if (src.listeningAcc !== null) bands.push(accuracyToBand(src.listeningAcc))
-  if (src.vocabRate !== null && src.vocabRate > 0) bands.push(vocabRateToBand(src.vocabRate))
+  if (src.vocabRate !== null) bands.push(vocabRateToBand(src.vocabRate))
   if (bands.length === 0) return null
   return overallRound(bands.reduce((a, b) => a + b, 0) / bands.length)
 }

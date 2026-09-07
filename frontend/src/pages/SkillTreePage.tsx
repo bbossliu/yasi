@@ -34,7 +34,7 @@ export default function SkillTreePage() {
     const byId = new Map(nodes.map((n) => [n.id, n]))
     const depth = (n: SkillNodeOut): number =>
       n.parent_id && byId.has(n.parent_id) ? 1 + depth(byId.get(n.parent_id)!) : 0
-    return [...nodes].sort((a, b) => a.code.localeCompare(b.code)).map((n) => (
+    return [...nodes].sort((a, b) => a.sort_order - b.sort_order || a.id - b.id).map((n) => (
       <div key={n.id} className="flex items-center gap-2 py-1"
         style={{ paddingLeft: `${depth(n) * 20}px` }}>
         <span className={`h-2.5 w-2.5 rounded-full ${dotClass(n)}`} />

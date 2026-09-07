@@ -94,6 +94,42 @@ def test_aggregate_node_green_when_all_children_green(tmp_path):
     s.close()
 
 
+def test_listening_accuracy_rule(tmp_path):
+    factory = make_db(tmp_path)
+    s = factory()
+    s.add(User(id=1))
+    seed_mastery_rules(s)
+    spelling = s.scalars(select(SkillNode).where(
+        SkillNode.code == "listening.dictation.spelling")).one()
+    assert spelling.criteria["rule"] == "listening_accuracy"
+
+    # 不足 window（仅 1 篇）→ False
+    add_practice(s, 1, "listening", {"overall": 92})
+    s.commit()
+    assert evaluate_node(spelling, s, 1) is False
+    # 3 篇精听 92/95/91 全部 ≥ 85 → True
+    add_practice(s, 2, "listening", {"overall": 95})
+    add_practice(s, 3, "listening", {"overall": 91})
+    s.commit()
+    assert evaluate_node(spelling, s, 1) is True
+    # 其中一篇正确率降到 80 < 85 → False
+    p3 = s.get(Practice, 3)
+    p3.total_band = 80
+    s.commit()
+    assert evaluate_node(spelling, s, 1) is False
+
+    # error_type 比率分支：恢复正确率达标后，归因 听力:连读 ×3 + 听力:词汇 ×1
+    liaison = s.scalars(select(SkillNode).where(
+        SkillNode.code == "listening.dictation.liaison")).one()
+    assert liaison.criteria["error_type"] == "听力:连读"
+    p3.total_band = 91
+    for pid, etype in ((1, "听力:连读"), (2, "听力:连读"), (3, "听力:连读"), (1, "听力:词汇")):
+        s.add(ErrorItem(user_id=1, practice_id=pid, error_type=etype, context="x"))
+    s.commit()
+    assert evaluate_node(liaison, s, 1) is False  # 3/4 = 0.75 > max_ratio 0.2
+    s.close()
+
+
 def test_evaluate_all_only_promotes_learned(tmp_path):
     factory = make_db(tmp_path)
     s = factory()

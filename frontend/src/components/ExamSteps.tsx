@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import {
-  createSpeakingSession, finishSpeakingSession, getReviewQueue, getSpeakingTurn,
-  listListeningMaterials, listPrompts, submitDictation, submitEssay,
+  createSpeakingSession, finishSpeakingSession, getEssay, getReviewQueue, getSpeakingTurn,
+  listListeningMaterials, listPrompts, listSpeakingCards, submitDictation, submitEssay,
   submitReview, submitSpeakingTurn, getListeningMaterial, requestListeningAudio,
 } from '../api/client'
 import type { MatDetailOut, ReviewCardOut } from '../api/types'
@@ -36,7 +36,6 @@ export function ExamWritingStep({ onDone }: { onDone: (practiceId: number) => vo
         duration_sec: Math.round((Date.now() - startRef.current) / 1000),
       })
       // 等批改完成再进下一步（轮询，最多 30 次 × 2s）
-      const { getEssay } = await import('../api/client')
       let detail = await getEssay(essay.id)
       let polls = 0
       while (detail.status === 'pending' && polls < 30) {
@@ -46,6 +45,10 @@ export function ExamWritingStep({ onDone }: { onDone: (practiceId: number) => vo
       }
       if (detail.status === 'pending') {
         setError('批改超时，请稍后重试')
+        return
+      }
+      if (detail.status !== 'done') {
+        setError('批改未完成，请重试')
         return
       }
       onDone(essay.id)
@@ -98,7 +101,7 @@ export function ExamSpeakingStep({ onDone }: { onDone: (practiceId: number) => v
 
   useEffect(() => {
     (async () => {
-      const cards = await import('../api/client').then((c) => c.listSpeakingCards(2))
+      const cards = await listSpeakingCards(2)
       const pick = cards[Math.floor(Math.random() * cards.length)]
       setCard(pick)
       const sess = await createSpeakingSession(pick.id)
@@ -130,6 +133,11 @@ export function ExamSpeakingStep({ onDone }: { onDone: (practiceId: number) => v
           await new Promise((r) => setTimeout(r, 2000))
           detail = await getSpeakingTurn(practice_id)
           polls++
+        }
+        if (detail.status !== 'done') {
+          setError('评分未完成，请重新录音')
+          setBusy(false)
+          return
         }
         await finishSpeakingSession(sessionId)
         onDone(practice_id)
