@@ -17,7 +17,8 @@ def test_materials_shape():
     sections = [m["section"] for m in LISTENING_MATERIALS]
     assert sections.count(2) == 2 and sections.count(3) == 2 and sections.count(4) == 2
     for m in LISTENING_MATERIALS:
-        assert 8 <= len(m["sentences"]) <= 12
+        # 扩写后每篇为真实雅思体量（30-40 句）
+        assert 30 <= len(m["sentences"]) <= 40
         assert all(len(s.split()) >= 5 for s in m["sentences"])
 
 
