@@ -170,8 +170,8 @@ from sqlalchemy import select
 
 from app.models import SkillNode
 
-_W = {"window": 5, "module": "writing"}
-_S = {"window": 5, "module": "speaking"}
+_W = {"window": 3, "module": "writing"}  # band_avg 窗口 3（no_error_type 单独用 5）
+_S = {"window": 3, "module": "speaking"}
 
 RULES: dict[str, dict] = {
     # 写作 TR/CC 由对应子分驱动
@@ -220,6 +220,13 @@ RULES: dict[str, dict] = {
 }
 
 
+# 修正说明（实现裁定）：band_avg 规则窗口为 3；no_error_type 规则的条目在下方循环中
+# 覆盖为 window=5。即：
+for _code, _c in RULES.items():
+    if _c["rule"] == "no_error_type":
+        _c["window"] = 5
+
+
 def seed_mastery_rules(session) -> None:
     """幂等：按 code 把 RULES 写入对应节点的 criteria 字段。"""
     nodes = session.scalars(select(SkillNode)).all()
@@ -254,7 +261,7 @@ def _recent_practices(session, user_id: int, module: str, window: int) -> list[P
         select(Practice)
         .where(Practice.user_id == user_id, Practice.module == module,
                Practice.status == "done")
-        .order_by(Practice.created_at.desc())
+        .order_by(Practice.created_at.desc(), Practice.id.desc())
         .limit(window)).all()
 
 
