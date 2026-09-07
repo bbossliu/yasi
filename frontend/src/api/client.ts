@@ -1,12 +1,15 @@
 import type {
+  ClearanceOut,
   DictationResultOut,
   EssayCreate,
   EssayDetail,
   EssayOut,
   ErrorItemOut,
+  ExamOut,
   ForecastOut,
   MatDetailOut,
   MatListOut,
+  ModuleTree,
   PromptOut,
   ReviewCardOut,
   SessionOut,
@@ -142,3 +145,17 @@ export function submitAttribution(practiceId: number, sentenceIndex: number, rea
     body: JSON.stringify({ practice_id: practiceId, sentence_index: sentenceIndex, reason }),
   })
 }
+
+export function getSkillTree(): Promise<ModuleTree[]> { return request('/skills/tree') }
+export function evaluateSkills(): Promise<{ updated: number }> { return request('/skills/evaluate', { method: 'POST' }) }
+export function getClearance(): Promise<ClearanceOut[]> { return request('/skills/clearance') }
+export function getExamEligibility(): Promise<{ eligible: boolean; missing: Record<string, number> }> { return request('/skills/exam-eligibility') }
+export function getTargetBand(): Promise<{ target_band: number }> { return request('/skills/target') }
+export function setTargetBand(band: number): Promise<{ target_band: number }> {
+  return request('/skills/target', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ target_band: band }) })
+}
+export function createMockExam(): Promise<{ exam_id: number }> { return request('/mock_exams', { method: 'POST' }) }
+export function completeMockExam(id: number, practiceIds: number[]): Promise<ExamOut> {
+  return request(`/mock_exams/${id}/complete`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ practice_ids: practiceIds }) })
+}
+export function getLatestExam(): Promise<ExamOut | null> { return request('/mock_exams/latest') }

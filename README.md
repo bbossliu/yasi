@@ -1,6 +1,6 @@
 # yasi
 
-AI 驱动的雅思私教（V1 写作批改 + V2 口语练习 + V3 词汇 + V4 听力）。
+AI 驱动的雅思私教（V1 写作批改 + V2 口语练习 + V3 词汇 + V4 听力 + V5 掌握体系）。
 
 ## 快速开始
 
@@ -9,22 +9,19 @@ AI 驱动的雅思私教（V1 写作批改 + V2 口语练习 + V3 词汇 + V4 �
 cd backend
 uv sync                      # 无 uv：python -m venv .venv && .venv/bin/pip install -e .
 cp .env.example .env         # 填入 DEEPSEEK_API_KEY；不填则用内置演示批改
-uv run uvicorn app.main:app --port 8000
+uv run uvicorn app.main:app --port 8022
 
 # 前端（Node >= 22）（本机实测 v20 无法构建）
 cd frontend
 npm install
-npm run dev                  # http://localhost:5173
+npm run dev                  # http://localhost:5173（被占用时自动顺延，如 5174）
 ```
 
-注意：V2 给 practice 表加了列，V3 给 word 表加了 pos/meaning 列；旧版生成的 `backend/yasi.db` 请删除后重建（开发期无迁移机制）。
+注意：V2 给 practice 表加了列，V3 给 word 表加了 pos/meaning 列，V5 给 mock_exam 表改了列；旧版生成的 `backend/yasi.db` 请删除后重建（开发期无迁移机制）。
 
 ### 端口占用
 
-前端 `vite.config.ts` 的代理写死指向 `http://localhost:8000`。若 8000 被其他项目占用，可任选其一：
-
-- 释放 8000 端口后再启动后端；或
-- 让后端跑在其他端口（如 `--port 8022`），并把 `frontend/vite.config.ts` 中 `server.proxy['/api'].target` 改为对应地址。
+前端 `vite.config.ts` 的代理默认指向 `http://localhost:8022`（因本机 8000 被其他项目长期占用）。若你使用 8000 端口起后端，把 `server.proxy['/api']` 改回 `http://localhost:8000` 即可；反之亦然——两端端口保持一致即可。
 
 ## 测试
 
@@ -53,6 +50,13 @@ cd frontend && npm run build
 - 音频由 edge-tts 逐句生成（首次打开素材时后台触发）；生成失败时文本练习仍可用
 - 三种模式：逐句字幕对照（单句循环 + 0.75/1/1.25 变速）/ 精听听写（词级 diff 标红 + 错题归因）/ 影子跟读（ASR 转写比对）
 - 听写正确率计入历史曲线（按模块切换查看）
+
+## 掌握体系（V5）
+
+- `/skills` 能力树：四模块能力点三态（未学/已学/已验证），绿态由练习数据按规则自动判定
+- `/mock` 全真模考：写作 → 口语 Part 2 → 听力精听 → 词汇快测 四步，输出预测总分 + 薄弱点报告
+- 模考解锁条件：所有能力点至少学过一遍（变黄）；预测分 ≥ 目标分显示「可赴考」
+- 目标分默认 6.5，仪表盘可切换 6.0/6.5/7.0/7.5
 
 ## 结构
 
