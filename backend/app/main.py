@@ -43,6 +43,8 @@ def init_db() -> None:
         seed_vocab_db(session)
         from app.seed_listening import seed_listening_db
         seed_listening_db(session)
+        from app.seed_rules import seed_mastery_rules
+        seed_mastery_rules(session)
     finally:
         session.close()
 
