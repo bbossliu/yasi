@@ -43,7 +43,7 @@ def get_material(mat_id: int, session=Depends(get_session)):
         raise HTTPException(status_code=404, detail="素材不存在")
     return MatDetailOut(
         id=mat.id, title=mat.title, section=_section_of(mat),
-        sentences=mat.transcript,
+        sentences=mat.transcript, sentences_zh=mat.transcript_zh,
         ready_count=audio_ready_count(mat.id, len(mat.transcript)),
     )
 

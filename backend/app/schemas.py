@@ -206,6 +206,7 @@ class MatDetailOut(BaseModel):
     title: str
     section: int
     sentences: list[str]
+    sentences_zh: list[str] = []
     ready_count: int
 
 

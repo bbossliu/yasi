@@ -69,6 +69,7 @@ function PracticeView({ mat, mode, setMode, onBack }: {
 }) {
   const [speed, setSpeed] = useState<number>(1)
   const [loopIdx, setLoopIdx] = useState<number | null>(null)
+  const [showZh, setShowZh] = useState(true)
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
   const play = (idx: number) => {
@@ -116,15 +117,25 @@ function PracticeView({ mat, mode, setMode, onBack }: {
             Section {mat.section}
           </span>
         </div>
-        <div className="flex gap-1">
-          {SPEEDS.map((s) => (
-            <button key={s} onClick={() => setSpeed(s)}
+        <div className="flex items-center gap-3">
+          {mat.sentences_zh.length > 0 && (
+            <button onClick={() => setShowZh(!showZh)}
               className={`rounded px-2 py-1 text-xs ${
-                speed === s ? 'bg-indigo-600 text-white' : 'bg-white border border-slate-200'
+                showZh ? 'bg-indigo-600 text-white' : 'bg-white border border-slate-200 text-slate-500'
               }`}>
-              {s}x
+              中文注释
             </button>
-          ))}
+          )}
+          <div className="flex gap-1">
+            {SPEEDS.map((s) => (
+              <button key={s} onClick={() => setSpeed(s)}
+                className={`rounded px-2 py-1 text-xs ${
+                  speed === s ? 'bg-indigo-600 text-white' : 'bg-white border border-slate-200'
+                }`}>
+                {s}x
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -150,7 +161,14 @@ function PracticeView({ mat, mode, setMode, onBack }: {
                 }`}>
                 {loopIdx === i ? '⏸ 停止' : '▶ 循环'}
               </button>
-              <span className="text-sm text-slate-700">{s}</span>
+              <span className="text-sm text-slate-700">
+                {s}
+                {showZh && mat.sentences_zh[i] && (
+                  <span className="mt-0.5 block text-xs text-slate-400">
+                    {mat.sentences_zh[i]}
+                  </span>
+                )}
+              </span>
             </div>
           ))}
           <p className="text-xs text-slate-400">
@@ -213,6 +231,9 @@ function DictationMode({ mat, play }: {
           {result && (
             <div className="mt-2 border-t border-slate-100 pt-2">
               <DiffTokens tokens={result.per_sentence[i].diff.tokens} />
+              {mat.sentences_zh[i] && (
+                <div className="mt-1 text-xs text-slate-400">{mat.sentences_zh[i]}</div>
+              )}
               {!result.per_sentence[i].correct && (
                 <div className="mt-2 flex items-center gap-2 text-xs">
                   <span className="text-slate-400">归因：</span>
@@ -294,7 +315,16 @@ function ShadowingMode({ mat }: { mat: MatDetailOut }) {
     <div className="space-y-4">
       <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-600">
         <div className="mb-2 font-semibold">原文（{mat.sentences.length} 句）</div>
-        {mat.sentences.map((s, i) => <p key={i} className="leading-7">{s}</p>)}
+        {mat.sentences.map((s, i) => (
+          <p key={i} className="leading-7">
+            {s}
+            {mat.sentences_zh[i] && (
+              <span className="block text-xs leading-5 text-slate-400">
+                {mat.sentences_zh[i]}
+              </span>
+            )}
+          </p>
+        ))}
       </div>
       <button onClick={toggle} disabled={busy}
         className={`w-full rounded-xl py-3 font-semibold text-white disabled:opacity-40 ${

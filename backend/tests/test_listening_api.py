@@ -46,9 +46,26 @@ def test_materials_and_detail(client):
 
     detail = client.get(f"/api/listening/materials/{mats[0]['id']}").json()
     assert len(detail["sentences"]) == mats[0]["sentence_count"]
+    assert detail["sentences_zh"] == []  # 测试环境无中文注释文件
     assert client.get("/api/listening/materials/999").status_code == 404
     # 音频不存在 → 404
     assert client.get(f"/api/listening/audio/{mats[0]['id']}/0.mp3").status_code == 404
+
+
+def test_detail_with_zh(client):
+    from sqlalchemy import select
+
+    from app.models import ListeningMat
+
+    s = app.state.session_factory()
+    mat = s.scalars(select(ListeningMat)).first()
+    mat.transcript_zh = [f"译文{i}" for i in range(len(mat.transcript))]
+    mat_id, n = mat.id, len(mat.transcript)
+    s.commit()
+    s.close()
+
+    detail = client.get(f"/api/listening/materials/{mat_id}").json()
+    assert detail["sentences_zh"] == [f"译文{i}" for i in range(n)]
 
 
 def test_dictation_flow_and_attribution(client):

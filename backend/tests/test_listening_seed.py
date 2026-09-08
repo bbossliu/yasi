@@ -58,3 +58,23 @@ def test_seed_listening_merges_expanded_json(tmp_path, monkeypatch):
     lib = next(m for m in mats if m.title == "Library Orientation")
     assert len(lib.transcript) == 25
     s.close()
+
+
+def test_seed_attaches_zh(tmp_path, monkeypatch):
+    import json
+    import app.seed_listening as seed_mod
+
+    title = LISTENING_MATERIALS[0]["title"]
+    zh = [f"译文{i}" for i in range(len(LISTENING_MATERIALS[0]["sentences"]))]
+    fake = tmp_path / "listening_zh.json"
+    fake.write_text(json.dumps({title: zh}, ensure_ascii=False), encoding="utf-8")
+    monkeypatch.setattr(seed_mod, "ZH_PATH", fake)
+
+    factory = make_db(tmp_path)
+    s = factory()
+    seed_listening_db(s)
+    mat = s.scalars(select(ListeningMat).where(ListeningMat.title == title)).one()
+    assert mat.transcript_zh == zh
+    others = s.scalars(select(ListeningMat).where(ListeningMat.title != title)).all()
+    assert all(m.transcript_zh == [] for m in others)
+    s.close()

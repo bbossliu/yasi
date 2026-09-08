@@ -47,6 +47,7 @@ cd frontend && npm run build
 ## 听力模块（V4）
 
 - 入口：`/listening`，Section 2/3/4 AI 生成素材（无版权问题），可用 `scripts/expand_content.py` 继续扩充
+- 每句配中文注释（`scripts/translate_listening.py` 生成，字幕对照/跟读模式可开关，听写提交后显示）
 - 音频由 edge-tts 逐句生成（首次打开素材时后台触发）；生成失败时文本练习仍可用
 - 三种模式：逐句字幕对照（单句循环 + 0.75/1/1.25 变速）/ 精听听写（词级 diff 标红 + 错题归因）/ 影子跟读（ASR 转写比对）
 - 听写正确率计入历史曲线（按模块切换查看）

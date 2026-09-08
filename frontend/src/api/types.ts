@@ -158,6 +158,7 @@ export interface MatDetailOut {
   title: string
   section: number
   sentences: string[]
+  sentences_zh: string[]
   ready_count: number
 }
 

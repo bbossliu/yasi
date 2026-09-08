@@ -17,3 +17,4 @@ def _isolate_expanded_content(tmp_path, monkeypatch):
     monkeypatch.setattr(app.seed_vocab, "EXPANDED_PATH", missing)
     monkeypatch.setattr(app.seed_speaking, "EXPANDED_CARDS_PATH", missing)
     monkeypatch.setattr(app.seed_listening, "EXPANDED_MATS_PATH", missing)
+    monkeypatch.setattr(app.seed_listening, "ZH_PATH", missing)

@@ -67,6 +67,7 @@ class ListeningMat(Base):
     title: Mapped[str] = mapped_column(String(200))
     audio_path: Mapped[str] = mapped_column(String(500), default="")
     transcript: Mapped[list] = mapped_column(JSON, default=list)
+    transcript_zh: Mapped[list] = mapped_column(JSON, default=list)
 
 
 class Practice(Base):
