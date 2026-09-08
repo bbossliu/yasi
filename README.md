@@ -39,14 +39,14 @@ cd frontend && npm run build
 
 ## 词汇模块（V3）
 
-- 入口：`/vocab`，10 个雅思话题 × 20 核心词（释义 / 真题风格例句 / 同义替换链）
+- 入口：`/vocab`，25 个雅思话题约 3000 核心词（释义 / 真题风格例句 / 同义替换链），支持搜索与单词发音（edge-tts）
 - 复习采用 SM-2 间隔重复：认识 / 模糊 / 不认识三档自评自动调度下次复习
 - 写作、口语批改中的「词汇搭配」错误命中词库时会自动建复习卡（错词强制复现）
-- 扩充词库：配好 DEEPSEEK_API_KEY 后运行 `cd backend && uv run python scripts/generate_vocab.py`
+- 扩充词库：配好 DEEPSEEK_API_KEY 后运行 `cd backend && uv run python scripts/expand_vocab.py`（按话题批量生成新词，可重复跑自动去重）；`scripts/export_vocab.py` 把词库导出为 `app/data/vocab_expanded.json` 随仓库分发（全新部署自动入库）；`scripts/generate_vocab.py` 只补全已有词的缺失字段
 
 ## 听力模块（V4）
 
-- 入口：`/listening`，Section 2/3/4 各 2 篇 AI 生成素材（无版权问题）
+- 入口：`/listening`，Section 2/3/4 AI 生成素材（无版权问题），可用 `scripts/expand_content.py` 继续扩充
 - 音频由 edge-tts 逐句生成（首次打开素材时后台触发）；生成失败时文本练习仍可用
 - 三种模式：逐句字幕对照（单句循环 + 0.75/1/1.25 变速）/ 精听听写（词级 diff 标红 + 错题归因）/ 影子跟读（ASR 转写比对）
 - 听写正确率计入历史曲线（按模块切换查看）

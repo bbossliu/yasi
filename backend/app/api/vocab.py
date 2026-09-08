@@ -8,6 +8,7 @@ from app.models import ReviewCard, Word
 from app.schemas import (ForecastOut, ReviewCardOut, ReviewQueueOut, ReviewSubmit,
                          TopicOut, WordOut)
 from app.services.sm2 import build_review_queue, get_or_create_card, sm2_review
+from app.services.tts import tts_url_for
 
 router = APIRouter(prefix="/api")
 
@@ -73,6 +74,18 @@ def submit_review(word_id: int, payload: ReviewSubmit, session=Depends(get_sessi
     sm2_review(card, payload.quality, datetime.now())
     session.commit()
     return {"next_due_at": card.due_at, "interval_days": card.interval_days}
+
+
+@router.post("/vocab/tts/{word_id}")
+def word_tts(word_id: int, session=Depends(get_session)):
+    """合成单词发音（edge-tts，磁盘缓存），返回 {"url": "/api/tts/xxx.mp3"}。"""
+    word = session.get(Word, word_id)
+    if word is None:
+        raise HTTPException(status_code=404, detail="单词不存在")
+    url = tts_url_for(word.text)
+    if url is None:
+        raise HTTPException(status_code=503, detail="语音合成失败，请稍后重试")
+    return {"url": url}
 
 
 @router.get("/vocab/forecast", response_model=list[ForecastOut])

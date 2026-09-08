@@ -47,3 +47,28 @@ def test_seed_speaking_idempotent(tmp_path):
     assert len(speaking_nodes) == 18
     assert all(n.module == "speaking" for n in speaking_nodes)
     s.close()
+
+
+def test_seed_speaking_merges_expanded_json(tmp_path, monkeypatch):
+    import json
+    import app.seed_speaking as seed_mod
+
+    expanded = [
+        {"part": 1, "topic": "Reading", "payload": {"questions": ["dup?"]}},
+        {"part": 1, "topic": "Music", "payload": {"questions": ["q1", "q2", "q3", "q4"]}},
+    ]
+    fake = tmp_path / "speaking_cards_expanded.json"
+    fake.write_text(json.dumps(expanded, ensure_ascii=False), encoding="utf-8")
+    monkeypatch.setattr(seed_mod, "EXPANDED_CARDS_PATH", fake)
+
+    factory = make_db(tmp_path)
+    s = factory()
+    seed_speaking_db(s)
+    seed_speaking_db(s)
+    topics = set(s.scalars(select(SpeakingCard.topic)).all())
+    assert "Music" in topics
+    # 内置 Reading 卡未被扩充文件覆盖（payload 仍是 4 问）
+    reading = s.scalars(select(SpeakingCard).where(SpeakingCard.topic == "Reading")).one()
+    assert len(reading.payload["questions"]) == 4
+    assert len(s.scalars(select(SpeakingCard)).all()) == 18 + 1
+    s.close()

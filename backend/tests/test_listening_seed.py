@@ -34,3 +34,27 @@ def test_seed_listening_idempotent(tmp_path):
     assert len(nodes) == 12
     assert all(n.module == "listening" for n in nodes)
     s.close()
+
+
+def test_seed_listening_merges_expanded_json(tmp_path, monkeypatch):
+    import json
+    import app.seed_listening as seed_mod
+
+    expanded = [
+        {"title": "Campus Facilities Tour", "section": 2, "sentences": ["dup."]},
+        {"title": "Library Orientation", "section": 2,
+         "sentences": [f"Sentence number {i} about the library." for i in range(25)]},
+    ]
+    fake = tmp_path / "listening_expanded.json"
+    fake.write_text(json.dumps(expanded), encoding="utf-8")
+    monkeypatch.setattr(seed_mod, "EXPANDED_MATS_PATH", fake)
+
+    factory = make_db(tmp_path)
+    s = factory()
+    seed_listening_db(s)
+    seed_listening_db(s)
+    mats = s.scalars(select(ListeningMat)).all()
+    assert len(mats) == 7  # 6 + 1（重复 title 被跳过）
+    lib = next(m for m in mats if m.title == "Library Orientation")
+    assert len(lib.transcript) == 25
+    s.close()

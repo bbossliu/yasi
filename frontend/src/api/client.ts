@@ -111,6 +111,10 @@ export function getVocabForecast(): Promise<ForecastOut[]> {
   return request('/vocab/forecast')
 }
 
+export function wordTts(wordId: number): Promise<{ url: string }> {
+  return request(`/vocab/tts/${wordId}`, { method: 'POST' })
+}
+
 export function listListeningMaterials(): Promise<MatListOut[]> {
   return request('/listening/materials')
 }

@@ -1,6 +1,21 @@
+import json
+from pathlib import Path
+
 from sqlalchemy import select
 
 from app.models import SkillNode, SpeakingCard
+
+EXPANDED_CARDS_PATH = Path(__file__).parent / "data" / "speaking_cards_expanded.json"
+
+
+def load_speaking_cards() -> list[dict]:
+    """内置话题卡 + expand_content.py 生成的扩充卡（按 topic 去重）。"""
+    cards = list(SPEAKING_CARDS)
+    if EXPANDED_CARDS_PATH.exists():
+        seen = {c["topic"] for c in cards}
+        expanded = json.loads(EXPANDED_CARDS_PATH.read_text(encoding="utf-8"))
+        cards.extend(c for c in expanded if c["topic"] not in seen)
+    return cards
 
 SPEAKING_NODES: list[tuple[str, str, str | None, int]] = [
     ("speaking.fc", "流利度与连贯（FC）", None, 0),
@@ -132,9 +147,9 @@ def seed_speaking_db(session) -> None:
             session.add(node)
             session.flush()
             code_to_node[code] = node
-    has_cards = session.scalars(select(SpeakingCard.id)).first()
-    if not has_cards:
-        for card in SPEAKING_CARDS:
+    existing_topics = set(session.scalars(select(SpeakingCard.topic)).all())
+    for card in load_speaking_cards():
+        if card["topic"] not in existing_topics:
             session.add(SpeakingCard(part=card["part"], topic=card["topic"],
                                      season="2026-09", payload=card["payload"]))
     session.commit()

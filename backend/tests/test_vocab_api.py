@@ -77,3 +77,15 @@ def test_forecast(client):
     assert sum(f["count"] for f in forecast) == 2  # word1(+10天不在内) word3(+3天)
     day3 = forecast[3]
     assert day3["count"] == 1
+
+
+def test_word_tts(client, monkeypatch):
+    monkeypatch.setattr("app.api.vocab.tts_url_for", lambda text: "/api/tts/fake.mp3")
+    resp = client.post("/api/vocab/tts/1")
+    assert resp.status_code == 200
+    assert resp.json() == {"url": "/api/tts/fake.mp3"}
+
+    assert client.post("/api/vocab/tts/9999").status_code == 404
+
+    monkeypatch.setattr("app.api.vocab.tts_url_for", lambda text: None)
+    assert client.post("/api/vocab/tts/1").status_code == 503

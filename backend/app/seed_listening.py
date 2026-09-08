@@ -1,7 +1,22 @@
+import json
+from pathlib import Path
+
 from sqlalchemy import select
 
 from app.data.listening_seed import LISTENING_MATERIALS
 from app.models import ListeningMat, SkillNode
+
+EXPANDED_MATS_PATH = Path(__file__).parent / "data" / "listening_expanded.json"
+
+
+def load_listening_materials() -> list[dict]:
+    """内置素材 + expand_content.py 生成的扩充素材（按 title 去重）。"""
+    mats = list(LISTENING_MATERIALS)
+    if EXPANDED_MATS_PATH.exists():
+        seen = {m["title"] for m in mats}
+        expanded = json.loads(EXPANDED_MATS_PATH.read_text(encoding="utf-8"))
+        mats.extend(m for m in expanded if m["title"] not in seen)
+    return mats
 
 LISTENING_NODES: list[tuple[str, str, str | None, int]] = [
     ("listening.dictation", "精听听写", None, 0),
@@ -22,7 +37,7 @@ LISTENING_NODES: list[tuple[str, str, str | None, int]] = [
 def seed_listening_db(session) -> None:
     """幂等：材料按 title 查重（便于后续追加素材），节点按前缀查重。"""
     existing = set(session.scalars(select(ListeningMat.title)).all())
-    for m in LISTENING_MATERIALS:
+    for m in load_listening_materials():
         if m["title"] not in existing:
             session.add(ListeningMat(title=m["title"], transcript=m["sentences"],
                                      audio_path=f"s{ m['section'] }"))

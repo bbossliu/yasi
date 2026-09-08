@@ -36,3 +36,30 @@ def test_seed_vocab_idempotent(tmp_path):
     assert w.meaning == "放弃；抛弃"
     assert "give up" in w.paraphrase_chain
     s.close()
+
+
+def test_seed_loads_expanded_json(tmp_path, monkeypatch):
+    import json
+    import app.seed_vocab as seed_mod
+
+    expanded = [
+        {"text": "abandon", "pos": "v.", "meaning": "重复词应被跳过", "topic": "教育",
+         "paraphrase_chain": ["x", "y"], "example_sentence": "dup."},
+        {"text": "cumulative", "pos": "adj.", "meaning": "累积的", "topic": "经济",
+         "paraphrase_chain": ["adding up", "accumulating", "aggregate"],
+         "example_sentence": "The cumulative effect of pollution is severe."},
+    ]
+    fake = tmp_path / "vocab_expanded.json"
+    fake.write_text(json.dumps(expanded, ensure_ascii=False), encoding="utf-8")
+    monkeypatch.setattr(seed_mod, "EXPANDED_PATH", fake)
+
+    factory = make_db(tmp_path)
+    s = factory()
+    seed_vocab_db(s)
+    words = s.scalars(select(Word)).all()
+    assert len(words) == 201  # 200 + 1（重复的 abandon 被跳过）
+    w = next(w for w in words if w.text == "cumulative")
+    assert w.topic == "经济"
+    # 内置 abandon 释义未被扩充文件覆盖
+    assert next(w for w in words if w.text == "abandon").meaning == "放弃；抛弃"
+    s.close()

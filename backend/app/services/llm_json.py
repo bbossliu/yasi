@@ -14,7 +14,8 @@ class LLMCallFailed(Exception):
 
 
 def chat_json(client: OpenAI, model: str, system: str, user: str,
-              schema: type[T], max_tokens: int = 8192, attempts: int = 3) -> T:
+              schema: type[T], max_tokens: int = 8192, attempts: int = 3,
+              temperature: float = 0.2) -> T:
     """调 LLM 拿 JSON 并按 Pydantic 校验：容忍未闭合 JSON（补 } 重 parse），失败重试。"""
     last_error: Exception | None = None
     for attempt in range(attempts):
@@ -26,7 +27,7 @@ def chat_json(client: OpenAI, model: str, system: str, user: str,
                     {"role": "user", "content": user},
                 ],
                 response_format={"type": "json_object"},
-                temperature=0.2,
+                temperature=temperature,
                 max_tokens=max_tokens,
             )
             choice = resp.choices[0]

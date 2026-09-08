@@ -4,7 +4,7 @@ from sqlalchemy import select
 from app.data.sample import SAMPLE_ESSAY, SAMPLE_PROMPT_TEXT, SAMPLE_PROMPT_TITLE
 from app.models import ErrorItem, Practice
 from app.schemas import ErrorItemOut, EssayCreate, EssayDetail, EssayOut, FeedbackOut, PromptOut
-from app.seed import TASK2_PROMPTS
+from app.seed import load_task2_prompts
 from app.services.grader import run_grading
 
 router = APIRouter(prefix="/api")
@@ -20,7 +20,7 @@ def get_session(request: Request):
 
 @router.get("/prompts", response_model=list[PromptOut])
 def list_prompts():
-    return TASK2_PROMPTS
+    return load_task2_prompts()
 
 
 @router.get("/sample")

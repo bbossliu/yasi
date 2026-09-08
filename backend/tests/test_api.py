@@ -26,9 +26,26 @@ def client(tmp_path, monkeypatch):
 
 def test_prompts_and_sample(client):
     prompts = client.get("/api/prompts").json()
-    assert len(prompts) == 4
+    assert len(prompts) >= 4  # 内置 4 题 + 可能的扩充题（writing_prompts_expanded.json）
     sample = client.get("/api/sample").json()
     assert len(sample["content"].split()) >= 200
+
+
+def test_load_task2_prompts_merges_expanded(tmp_path, monkeypatch):
+    import json
+    import app.seed as seed_mod
+
+    expanded = [
+        {"title": "重复题", "text": seed_mod.TASK2_PROMPTS[0]["text"]},
+        {"title": "饮食话题：糖税", "text": "Some countries tax sugary drinks. Is this fair?"},
+    ]
+    fake = tmp_path / "writing_prompts_expanded.json"
+    fake.write_text(json.dumps(expanded, ensure_ascii=False), encoding="utf-8")
+    monkeypatch.setattr(seed_mod, "EXPANDED_PROMPTS_PATH", fake)
+
+    prompts = seed_mod.load_task2_prompts()
+    assert len(prompts) == 4 + 1
+    assert prompts[-1]["title"] == "饮食话题：糖税"
 
 
 def test_submit_and_poll_result(client):

@@ -1,0 +1,214 @@
+[
+ {
+  "part": 1,
+  "topic": "Hometown",
+  "payload": {
+   "questions": [
+    "Where is your hometown?",
+    "What do you like most about your hometown?",
+    "Has your hometown changed much since you were a child?",
+    "Would you recommend visiting your hometown to a foreigner?"
+   ]
+  }
+ },
+ {
+  "part": 1,
+  "topic": "Music",
+  "payload": {
+   "questions": [
+    "What kind of music do you enjoy listening to?",
+    "Do you prefer live music or recorded music?",
+    "How often do you listen to music?",
+    "Has your taste in music changed over the years?"
+   ]
+  }
+ },
+ {
+  "part": 1,
+  "topic": "Sports",
+  "payload": {
+   "questions": [
+    "Do you play any sports?",
+    "What sports are popular in your country?",
+    "Did you play sports when you were a child?",
+    "Do you prefer watching sports or playing sports?"
+   ]
+  }
+ },
+ {
+  "part": 1,
+  "topic": "Food",
+  "payload": {
+   "questions": [
+    "What is your favorite food?",
+    "Do you like cooking?",
+    "What is a typical meal in your country?",
+    "Have you tried any exotic foods?"
+   ]
+  }
+ },
+ {
+  "part": 1,
+  "topic": "Reading",
+  "payload": {
+   "questions": [
+    "Do you like reading?",
+    "What kind of books do you usually read?",
+    "Do you prefer reading books or watching movies?",
+    "Do you think reading is important for children?"
+   ]
+  }
+ },
+ {
+  "part": 1,
+  "topic": "Shopping",
+  "payload": {
+   "questions": [
+    "Do you enjoy shopping?",
+    "How often do you go shopping?",
+    "Do you prefer shopping online or in stores?",
+    "What do you usually buy when you go shopping?"
+   ]
+  }
+ },
+ {
+  "part": 2,
+  "topic": "Describe a memorable journey you have taken.",
+  "payload": {
+   "cues": [
+    "where you went",
+    "who you went with",
+    "what you did",
+    "and explain why it was memorable"
+   ]
+  }
+ },
+ {
+  "part": 2,
+  "topic": "Describe a person who has influenced you a lot.",
+  "payload": {
+   "cues": [
+    "who this person is",
+    "how you know them",
+    "what qualities they have",
+    "and explain how they have influenced you"
+   ]
+  }
+ },
+ {
+  "part": 2,
+  "topic": "Describe a skill you think is important for everyone to have.",
+  "payload": {
+   "cues": [
+    "what the skill is",
+    "how you learned it",
+    "why it is important",
+    "and explain how it benefits people"
+   ]
+  }
+ },
+ {
+  "part": 2,
+  "topic": "Describe a place you like to visit for relaxation.",
+  "payload": {
+   "cues": [
+    "where it is",
+    "how often you go there",
+    "what you do there",
+    "and explain why it helps you relax"
+   ]
+  }
+ },
+ {
+  "part": 2,
+  "topic": "Describe an important decision you made.",
+  "payload": {
+   "cues": [
+    "what the decision was",
+    "why you made it",
+    "what the result was",
+    "and explain why it was important"
+   ]
+  }
+ },
+ {
+  "part": 2,
+  "topic": "Describe a book that you have read recently.",
+  "payload": {
+   "cues": [
+    "what the book is",
+    "what it is about",
+    "why you decided to read it",
+    "and explain what you think of it"
+   ]
+  }
+ },
+ {
+  "part": 2,
+  "topic": "Describe a time you helped someone.",
+  "payload": {
+   "cues": [
+    "who you helped",
+    "how you helped them",
+    "why you helped them",
+    "and explain how you felt about it"
+   ]
+  }
+ },
+ {
+  "part": 2,
+  "topic": "Describe a piece of technology you find useful.",
+  "payload": {
+   "cues": [
+    "what it is",
+    "how you use it",
+    "how often you use it",
+    "and explain why you find it useful"
+   ]
+  }
+ },
+ {
+  "part": 3,
+  "topic": "Education",
+  "payload": {
+   "questions": [
+    "How has education changed in your country over the past few decades?",
+    "What are the advantages and disadvantages of online learning?",
+    "Do you think the current education system prepares students for the future?"
+   ]
+  }
+ },
+ {
+  "part": 3,
+  "topic": "Technology",
+  "payload": {
+   "questions": [
+    "What impact has technology had on people's daily lives?",
+    "Are there any negative effects of technology on society?",
+    "How do you think technology will develop in the future?"
+   ]
+  }
+ },
+ {
+  "part": 3,
+  "topic": "Environment",
+  "payload": {
+   "questions": [
+    "What are the main environmental problems in your country?",
+    "What can individuals do to help protect the environment?",
+    "Should governments take more action to address climate change?"
+   ]
+  }
+ },
+ {
+  "part": 3,
+  "topic": "Culture",
+  "payload": {
+   "questions": [
+    "How is culture preserved in your country?",
+    "Do you think globalization is threatening local cultures?",
+    "How can people learn about other cultures?"
+   ]
+  }
+ }
+]

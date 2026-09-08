@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+
 from sqlalchemy import select
 
 from app.models import SkillNode
@@ -32,6 +35,18 @@ TASK2_PROMPTS: list[dict] = [
     {"title": "环境话题：个人能否改变环境", "text": "Some people believe individuals can make a difference to the environment, while others think only governments and large companies can. Discuss both views and give your own opinion."},
     {"title": "媒体话题：广告的利弊", "text": "Advertising encourages people to buy things they do not need. To what extent do you agree or disagree?"},
 ]
+
+EXPANDED_PROMPTS_PATH = Path(__file__).parent / "data" / "writing_prompts_expanded.json"
+
+
+def load_task2_prompts() -> list[dict]:
+    """内置题目 + expand_content.py 生成的扩充题目（按 text 去重）。"""
+    prompts = list(TASK2_PROMPTS)
+    if EXPANDED_PROMPTS_PATH.exists():
+        seen = {p["text"] for p in prompts}
+        expanded = json.loads(EXPANDED_PROMPTS_PATH.read_text(encoding="utf-8"))
+        prompts.extend(p for p in expanded if p["text"] not in seen)
+    return prompts
 
 
 def seed_db(session) -> None:

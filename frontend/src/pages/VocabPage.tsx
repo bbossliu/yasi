@@ -1,15 +1,43 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  getReviewQueue, getVocabForecast, listVocabTopics, listVocabWords, submitReview,
+  getReviewQueue, getVocabForecast, listVocabTopics, listVocabWords, submitReview, wordTts,
 } from '../api/client'
 import type { ForecastOut, ReviewCardOut, TopicOut, WordOut } from '../api/types'
 import { useEcharts } from '../hooks/useEcharts'
+
+function PlayButton({ wordId, size = 'text-sm' }: { wordId: number; size?: string }) {
+  const [busy, setBusy] = useState(false)
+  const play = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (busy) return
+    setBusy(true)
+    try {
+      const { url } = await wordTts(wordId)
+      await new Audio(url).play()
+    } catch (err) {
+      console.error('发音播放失败', err)
+    } finally {
+      setBusy(false)
+    }
+  }
+  return (
+    <button
+      onClick={play}
+      disabled={busy}
+      title="播放发音"
+      className={`rounded-full px-1.5 text-indigo-500 hover:bg-indigo-50 disabled:opacity-40 ${size}`}
+    >
+      {busy ? '…' : '🔊'}
+    </button>
+  )
+}
 
 export default function VocabPage() {
   const [topics, setTopics] = useState<TopicOut[]>([])
   const [selected, setSelected] = useState('')
   const [words, setWords] = useState<WordOut[]>([])
+  const [query, setQuery] = useState('')
   const [reviewing, setReviewing] = useState(false)
   const [queue, setQueue] = useState<ReviewCardOut[]>([])
   const [dueTotal, setDueTotal] = useState(0)
@@ -37,6 +65,11 @@ export default function VocabPage() {
     setQueue(q.cards)
     setReviewing(true)
   }
+
+  const q = query.trim().toLowerCase()
+  const filtered = q
+    ? words.filter((w) => w.text.includes(q) || w.meaning.toLowerCase().includes(q))
+    : words
 
   if (reviewing) {
     return (
@@ -83,12 +116,24 @@ export default function VocabPage() {
         </button>
       </div>
       {error && <div className="text-sm text-red-500">{error}</div>}
+      <div className="flex items-center gap-3">
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="搜索单词或释义…"
+          className="w-64 rounded-lg border border-slate-300 px-3 py-1.5 text-sm"
+        />
+        <span className="text-sm text-slate-400">
+          {query ? `匹配 ${filtered.length} / ${words.length} 词` : `共 ${words.length} 词`}
+        </span>
+      </div>
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-        {words.map((w) => (
+        {filtered.map((w) => (
           <div key={w.id} className="rounded-xl border border-slate-200 bg-white p-4">
             <div className="flex items-baseline gap-2">
               <span className="text-lg font-bold text-slate-800">{w.text}</span>
               <span className="text-xs text-slate-400">{w.pos}</span>
+              <PlayButton wordId={w.id} />
               {w.reps > 0 && (
                 <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-xs text-emerald-700">
                   已复习 {w.reps} 次
@@ -197,14 +242,18 @@ function ReviewSession({ initialQueue, onFinish }: {
           {!flipped ? (
             <>
               <div className="text-3xl font-bold text-slate-800">{current.text}</div>
-              <div className="mt-1 text-sm text-slate-400">{current.pos}</div>
+              <div className="mt-1 flex items-center justify-center gap-1 text-sm text-slate-400">
+                {current.pos}
+                <PlayButton wordId={current.word_id} />
+              </div>
               <div className="mt-6 text-xs text-slate-300">点击卡片查看释义</div>
             </>
           ) : (
             <div className="space-y-3 text-left">
-              <div className="text-center">
+              <div className="flex items-center justify-center gap-1 text-center">
                 <span className="text-2xl font-bold">{current.text}</span>
-                <span className="ml-2 text-sm text-slate-400">{current.pos}</span>
+                <span className="text-sm text-slate-400">{current.pos}</span>
+                <PlayButton wordId={current.word_id} />
               </div>
               <div className="text-slate-700">{current.meaning}</div>
               <div className="text-sm italic text-slate-500">{current.example_sentence}</div>
